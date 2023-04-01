@@ -5,8 +5,6 @@
 #include "AppLayer.h"
 
 
-
-
 class PaintDowngradeApp : public  Engine::Application
 {
 public:
@@ -20,7 +18,6 @@ public:
 	}
 
 private:
-
 
 
 };

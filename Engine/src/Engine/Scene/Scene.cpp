@@ -45,8 +45,7 @@ namespace Engine {
 			{
 				if (!nsc.Instance)
 				{
-					nsc.Instance = nsc.InstantiateScript();
-					nsc.Instance->m_Entity = Entity{ entity, this };
+					nsc.Instance = nsc.InstantiateScript({ entity, this });
 					nsc.Instance->OnCreate();
 				}
 				nsc.Instance->OnUpdate(ts);
@@ -54,7 +53,10 @@ namespace Engine {
 		}
 
 		Camera* mainCamera = nullptr;
-		glm::mat4 cameraTransform;
+		Camera* anotherCamera = nullptr;
+		glm::mat4 mainCameraTransform;
+		glm::mat4 anotherCameraTransform;
+
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
 			for (auto entity : view)
@@ -64,15 +66,28 @@ namespace Engine {
 				if (camera.Primary)
 				{
 					mainCamera = &camera.Camera;
-					cameraTransform = transform.GetTransform();
-					break;
+					mainCameraTransform = transform.GetTransform();
 				}
+				else
+				{
+					anotherCamera = &camera.Camera;
+					anotherCameraTransform = transform.GetTransform();
+				}
+	
 			}
 		}
 
+		
 		if (mainCamera)
 		{
-			Renderer2D::BeginScene(mainCamera->GetProjection(), cameraTransform);
+			// Rendering UI
+			
+		}
+
+		if (anotherCamera)
+		{
+			//Rendering Workspace
+			Renderer2D::BeginScene(anotherCamera->GetProjection(), anotherCameraTransform);
 
 			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 			for (auto entity : group)

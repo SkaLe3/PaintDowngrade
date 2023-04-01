@@ -14,9 +14,14 @@ public:
 
 	bool OnKeyPressed(Engine::KeyPressedEvent& e);
 
+	void LoadScene();
+
 private:
 	Engine::Entity m_UICamera;
 	Engine::Entity m_WorkspaceCamera;
+
+	Engine::Entity m_UIPanelEntity;
+	Engine::Entity m_WorkspaceEntity;
 
 	Engine::Ref<Engine::Scene> m_ActiveScene;
 

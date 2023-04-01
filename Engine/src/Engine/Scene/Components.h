@@ -69,13 +69,13 @@ namespace Engine {
 	{
 		ScriptableEntity* Instance = nullptr;
 
-		ScriptableEntity* (*InstantiateScript)(); 
+		ScriptableEntity* (*InstantiateScript)(Entity entity); 
 		void(*DestroyScript)(NativeScriptComponent*);
 
 		template<typename T>
 		void Bind()
 		{
-			InstantiateScript = []() {return static_cast<ScriptableEntity*>(new T());};
+			InstantiateScript = [](Entity entity) {return static_cast<ScriptableEntity*>(new T(entity));};
 			DestroyScript = [](NativeScriptComponent* nsc) {delete nsc->Instance; nsc->Instance = nullptr; };
 		}
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene.h"
 #include <entt.hpp>
+#include "Engine/Core/Log.h"
 namespace Engine {
 
 	class Entity
@@ -37,6 +38,11 @@ namespace Engine {
 		{
 			EG_ASSERT(HasComponent<T>(), "Entity does not have component"); 
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
+		}
+
+		Scene* GetScene()
+		{
+			return m_Scene;
 		}
 
 		operator bool() const { return m_EntityHandle != entt::null; }
