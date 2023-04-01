@@ -64,14 +64,14 @@ void AppLayer::LoadScene()
 	float width = 1280;
 	m_UICamera = m_ActiveScene->CreateEntity("UICamera");
 	m_UICamera.AddComponent<Engine::CameraComponent>().Primary = false;
-	m_UICamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographicSize(height);
-	m_UICamera.GetComponent<Engine::TransformComponent>().Translation = { width / 2.0f, height / 2.0f, 0.0f };
+	m_UICamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographic(height, 0.0f, 2.0f);
+	m_UICamera.GetComponent<Engine::TransformComponent>().Translation = { width / 2.0f, height / 2.0f, 11.0f }; //range 11 - 9, use 11 - 10
 	m_UICamera.GetComponent<Engine::TransformComponent>().Scale.y = -1.0f;
 
 	m_WorkspaceCamera = m_ActiveScene->CreateEntity("WorkspaceCamera");
-	m_WorkspaceCamera.AddComponent<Engine::CameraComponent>();
+	m_WorkspaceCamera.AddComponent<Engine::CameraComponent>().Primary = true;
+	m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographic(100.0f, 0.0f, 2.0f); 
 
-	
-
+	m_WorkspaceCamera.GetComponent<Engine::TransformComponent>().Translation.z = 2.0f; // range  2 - 0, use 1 - 0
 	m_WorkspaceCamera.AddComponent<Engine::NativeScriptComponent>().Bind<CameraController>();
 }

@@ -77,29 +77,42 @@ namespace Engine {
 			}
 		}
 
-		
 		if (mainCamera)
 		{
-			// Rendering UI
-			
-		}
-
-		if (anotherCamera)
-		{
-			//Rendering Workspace
-			Renderer2D::BeginScene(anotherCamera->GetProjection(), anotherCameraTransform);
+			// Rendering Workspace
+			Renderer2D::BeginScene(mainCamera->GetProjection(), mainCameraTransform);
 
 			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 			for (auto entity : group)
 			{
-				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+				//if (!m_Registry.any_of<UIComponent>(entity)) 
+				{
+					auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+					Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+				}
 			}
 
 			Renderer2D::EndScene();
 		}
+#if 1
+		if (anotherCamera)
+		{
+			//Rendering UI
+			Renderer2D::BeginScene(anotherCamera->GetProjection(), anotherCameraTransform);
 
+			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent, UIComponent>);
+			for (auto entity : group)
+			{
+				//if (m_Registry.any_of<UIComponent>(entity)) 
+				{
+					auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+					Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+				}
+			}
+
+			Renderer2D::EndScene();
+		}
+#endif
 	}
 
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
@@ -177,6 +190,11 @@ namespace Engine {
 	}
 	template<>
 	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<UIComponent>(Entity entity, UIComponent& component)
 	{
 	}
 

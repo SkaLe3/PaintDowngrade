@@ -7,7 +7,7 @@ public:
 	WorkspaceManager(Engine::Entity entity) : Engine::ScriptableEntity(entity) {}
 	virtual ~WorkspaceManager() { s_Instance = nullptr; };
 
-
+	virtual void OnCreate() override;
 	virtual void OnUpdate(Engine::Timestep ts) override {}
 
 public:

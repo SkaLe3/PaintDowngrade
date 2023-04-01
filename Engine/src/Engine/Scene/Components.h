@@ -80,4 +80,9 @@ namespace Engine {
 		}
 
 	};
+
+	struct UIComponent
+	{
+		bool DrawOnlyOnUI = true;
+	};
 }
