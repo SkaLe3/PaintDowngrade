@@ -12,6 +12,7 @@ public:
 	void OnUpdate(Engine::Timestep ts) override;
 	void OnEvent(Engine::Event& e) override;
 
+	bool OnMouseScroll(Engine::MouseScrolledEvent& e);
 	bool OnKeyPressed(Engine::KeyPressedEvent& e);
 
 	void LoadScene();

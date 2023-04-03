@@ -3,9 +3,11 @@
 #include "entt.hpp"
 #include "Engine/Core/Timestep.h"
 #include "Engine/Renderer/EditorCamera.h"
+
 namespace Engine {
 
 	class Entity;
+	struct CameraComponent;
 
 	class Scene
 	{
@@ -23,7 +25,10 @@ namespace Engine {
 		Entity GetPrimaryCameraEntity();
 	private:
 		template<typename T>
-		void OnComponentAdded(Entity entity, T& component);
+		void OnComponentAdded(Entity entity, T& component) {}
+
+		template<>
+		void OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component);
 
 	private:
 		entt::registry m_Registry;

@@ -471,4 +471,12 @@ namespace Engine {
 		s_Data.QuadIndexCount += 6;
 	}
 
+	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src)
+	{
+		if (src.Texture)
+			DrawQuad(transform, src.Texture, src.TilingFactor, src.Color);
+		else
+			DrawQuad(transform, src.Color);
+	}
+
 }

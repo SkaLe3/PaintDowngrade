@@ -42,77 +42,45 @@ namespace Engine {
 	{
 		{
 			m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
-			{
-				if (!nsc.Instance)
 				{
-					nsc.Instance = nsc.InstantiateScript({ entity, this });
-					nsc.Instance->OnCreate();
-				}
-				nsc.Instance->OnUpdate(ts);
-			}); 
+					if (!nsc.Instance)
+					{
+						EG_TRACE("NativeScriptUpdate:", m_Registry.get<TagComponent>(entity).Tag);
+						nsc.Instance = nsc.InstantiateScript({ entity, this });
+						nsc.Instance->OnCreate();
+					}
+			nsc.Instance->OnUpdate(ts);
+				});
 		}
 
 		Camera* mainCamera = nullptr;
-		Camera* anotherCamera = nullptr;
+
 		glm::mat4 mainCameraTransform;
-		glm::mat4 anotherCameraTransform;
+
 
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
 			for (auto entity : view)
 			{
 				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
+				mainCamera = &camera.Camera;
+				mainCameraTransform = transform.GetTransform();;
+				Renderer2D::BeginScene(mainCamera->GetProjection(), mainCameraTransform);
 
-				if (camera.Primary)
+				auto view = m_Registry.view<SpriteRendererComponent>();
+				//for (auto entity : view)
+				for (auto entity = view.rbegin(), last = view.rend(); entity != last; ++entity) 
 				{
-					mainCamera = &camera.Camera;
-					mainCameraTransform = transform.GetTransform();
+						auto [transform, sprite] = m_Registry.get<TransformComponent, SpriteRendererComponent>(*entity);
+						Renderer2D::DrawSprite(transform.GetTransform(), sprite);
+					//EG_TRACE("Name:", m_Registry.get<TagComponent>(*entity).Tag);
+
 				}
-				else
-				{
-					anotherCamera = &camera.Camera;
-					anotherCameraTransform = transform.GetTransform();
-				}
-	
+
+				Renderer2D::EndScene();
+
 			}
 		}
-
-		if (mainCamera)
-		{
-			// Rendering Workspace
-			Renderer2D::BeginScene(mainCamera->GetProjection(), mainCameraTransform);
-
-			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-			for (auto entity : group)
-			{
-				//if (!m_Registry.any_of<UIComponent>(entity)) 
-				{
-					auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-					Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
-				}
-			}
-
-			Renderer2D::EndScene();
-		}
-#if 1
-		if (anotherCamera)
-		{
-			//Rendering UI
-			Renderer2D::BeginScene(anotherCamera->GetProjection(), anotherCameraTransform);
-
-			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent, UIComponent>);
-			for (auto entity : group)
-			{
-				//if (m_Registry.any_of<UIComponent>(entity)) 
-				{
-					auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-					Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
-				}
-			}
-
-			Renderer2D::EndScene();
-		}
-#endif
 	}
 
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
@@ -163,39 +131,11 @@ namespace Engine {
 
 	// OComponentAdded Realizations
 
-	template<typename T>
-	void Scene::OnComponentAdded(Entity entity, T& component)
-	{
-		//static_assert(false);
-	}
-
-	template<>
-	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
-	{
-	}
-
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
 		component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeiht);
 	}
 
-	template<>
-	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
-	{
-	}
-	template<>
-	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component)
-	{
-	}
-	template<>
-	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
-	{
-	}
-
-	template<>
-	void Scene::OnComponentAdded<UIComponent>(Entity entity, UIComponent& component)
-	{
-	}
 
 }

@@ -4,81 +4,55 @@
 // Useable z range 10 - 11 
 void UIManager::OnCreate()
 {
-
-	{
-		auto panel = m_Entity.GetScene()->CreateEntity("UIPanel");
-		panel.AddComponent<Engine::SpriteRendererComponent>(glm::vec4{ 0.3f, 0.3f, 0.3f, 1.0f });
-		Engine::TransformComponent& tc = panel.GetComponent<Engine::TransformComponent>();
-		panel.AddComponent<Engine::UIComponent>();
-
-		tc.Scale.x = 280;
-		tc.Scale.y = 720;
-		tc.Translation.x = tc.Scale.x/ 2.0f;
-		tc.Translation.y = tc.Scale.y / 2.0f;
-		tc.Translation.z = 10.0f;
-		m_ElementsUI.push_back(panel);
-	}
-	// TODO: Make function CreateButton(const ButtonSpecification& spec);
-	// 
-	// struct ButtonSpecification{
-	//		const char* name;
-	//		float width, height;
-	//		float x, y;
-	//		glm::vec4 color
-	// }
-
-	{
-		auto cursorButton = m_Entity.GetScene()->CreateEntity("CursorButton");
-		cursorButton.AddComponent<Engine::SpriteRendererComponent>(glm::vec4{ 0.5f, 0.5f, 0.5f, 1.0f });
-		Engine::TransformComponent& tc = cursorButton.GetComponent<Engine::TransformComponent>();
-		cursorButton.AddComponent<Engine::UIComponent>();
-		tc.Scale.x = 40;
-		tc.Scale.y = 40;
-		tc.Translation.x = tc.Scale.x / 2.0f + 20.0f;
-		tc.Translation.y = tc.Scale.y / 2.0f + 20.0f;
-		tc.Translation.z = 10.0f;
-		m_ElementsUI.push_back(cursorButton);
-	}
-
-	{
-		auto circleButton = m_Entity.GetScene()->CreateEntity("CircleButton");
-		circleButton.AddComponent<Engine::SpriteRendererComponent>(glm::vec4{ 0.5f, 0.5f, 0.5f, 1.0f });
-		Engine::TransformComponent& tc = circleButton.GetComponent<Engine::TransformComponent>();
-		circleButton.AddComponent<Engine::UIComponent>();
-		tc.Scale.x = 40;
-		tc.Scale.y = 40;
-		tc.Translation.x = tc.Scale.x / 2.0f + 80.0f;
-		tc.Translation.y = tc.Scale.y / 2.0f + 20.0f;
-		tc.Translation.z = 10.0f;
-		m_ElementsUI.push_back(circleButton);
-	}
-
-	{
-		auto rectButton = m_Entity.GetScene()->CreateEntity("RectangleButton");
-		rectButton.AddComponent<Engine::SpriteRendererComponent>(glm::vec4{ 0.5f, 0.5f, 0.5f, 1.0f });
-		Engine::TransformComponent& tc = rectButton.GetComponent<Engine::TransformComponent>();
-		rectButton.AddComponent<Engine::UIComponent>();
-		tc.Scale.x = 40;
-		tc.Scale.y = 40;
-		tc.Translation.x = tc.Scale.x / 2.0f + 140.0f;
-		tc.Translation.y = tc.Scale.y / 2.0f + 20.0f;
-		tc.Translation.z = 10.0f;
-		m_ElementsUI.push_back(rectButton);
-	}
-
-	{
-		auto triangleButton = m_Entity.GetScene()->CreateEntity("TriangleleButton");
-		triangleButton.AddComponent<Engine::SpriteRendererComponent>(glm::vec4{ 0.5f, 0.5f, 0.5f, 1.0f });
-		Engine::TransformComponent& tc = triangleButton.GetComponent<Engine::TransformComponent>();
-		triangleButton.AddComponent<Engine::UIComponent>();
-		tc.Scale.x = 40;
-		tc.Scale.y = 40;
-		tc.Translation.x = tc.Scale.x / 2.0f + 200.0f;
-		tc.Translation.y = tc.Scale.y / 2.0f + 20.0f;
-		tc.Translation.z = 10.0f;
-		m_ElementsUI.push_back(triangleButton);
-	}
+	m_Textures["CursorButton"] = Engine::Texture2D::Create("assets/textures/CursorButton.png");
+	m_Textures["RectangleButton"] = Engine::Texture2D::Create("assets/textures/RectangleButton.png");
+	m_Textures["TriangleButton"] = Engine::Texture2D::Create("assets/textures/TriangleButton.png");
+	m_Textures["CircleButton"] = Engine::Texture2D::Create("assets/textures/CircleButton.png");
 
 
+	UIElementSpecification spec{ "UIPanel", {280, 720 }, { 0, 0, 10 }, {0.3, 0.3, 0.3, 1.0f} };
+	CreateUIElement(spec); 
+
+	spec.Name = "CursorButton";
+	spec.Size = { 40, 40 };
+	spec.Position = { 20, 20, 10.1 };
+	spec.Color = { 1.0, 1.0, 1.0, 1.0 };
+	CreateUIElement(spec, m_Textures["CursorButton"]);
+
+	spec.Name = "CircleButton";
+	spec.Position.x = 80;
+	CreateUIElement(spec, m_Textures["CircleButton"]);
+
+	spec.Name = "RectangleButton";
+	spec.Position.x = 140;
+	CreateUIElement(spec, m_Textures["RectangleButton"]);
+
+
+	spec.Name = "TriangleButton";
+	spec.Position.x = 200;
+	CreateUIElement(spec, m_Textures["TriangleButton"]);
+
+
+}
+
+// TODO: add enum for type of UI. Button, Slider etc.
+Engine::Entity UIManager::CreateUIElement(const UIElementSpecification& spec, Engine::Ref<Engine::Texture2D> texture)
+{
+	auto button = m_Entity.GetScene()->CreateEntity(spec.Name);
+	button.AddComponent<Engine::SpriteRendererComponent>(spec.Color);
+	Engine::TransformComponent& tc = button.GetComponent<Engine::TransformComponent>();
+	button.AddComponent<Engine::UIComponent>();
+	if (texture)
+		button.GetComponent<Engine::SpriteRendererComponent>().Texture = texture;
+
+
+	tc.Scale.x = spec.Size.x;
+	tc.Scale.y = -spec.Size.y;
+	tc.Translation.x = spec.Size.x / 2.0f + spec.Position.x;
+	tc.Translation.y = spec.Size.y / 2.0f + spec.Position.y;
+	tc.Translation.z = spec.Position.z;
+	m_ElementsUI.push_back(button);
+
+	return button;
 }
 
