@@ -9,7 +9,11 @@ namespace Engine {
 	public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
-		Entity(const Entity& other) = default;
+		Entity(const Entity& other) //= default;
+		{
+			m_EntityHandle = other.m_EntityHandle;
+			m_Scene = other.m_Scene;
+		}
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)

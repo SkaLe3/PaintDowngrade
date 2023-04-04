@@ -36,13 +36,14 @@ void AppLayer::OnEvent(Engine::Event& e)
 	Engine::EventDispatcher dispatcher(e);
 	dispatcher.Dispatch<Engine::KeyPressedEvent>(BIND_EVENT_FN(AppLayer::OnKeyPressed));
 	dispatcher.Dispatch<Engine::MouseScrolledEvent>(BIND_EVENT_FN(AppLayer::OnMouseScroll));
+	dispatcher.Dispatch<Engine::MouseButtonPressedEvent>(BIND_EVENT_FN(AppLayer::OnMouseButtonPressed));
 
 }
 
 bool AppLayer::OnMouseScroll(Engine::MouseScrolledEvent& e)
 {
 	float delta = e.GetYOffset() * 10;
-	EG_TRACE("Y offset:", e.GetYOffset(), "X offset", e.GetXOffset());
+
 	float value = m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.GetOrthographicSize();
 	m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographicSize(value + delta);
 	return true;
@@ -54,6 +55,30 @@ bool AppLayer::OnKeyPressed(Engine::KeyPressedEvent& e)
 	return true;
 }
 
+bool AppLayer::OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e)
+{
+	glm::vec2 ViewportSize = m_ActiveScene->GetViewportSize();
+	UIManager* UI = (UIManager*)m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
+	WorkspaceManager* Workspace = (WorkspaceManager*)m_WorkspaceEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
+	float xSize = UI->GetXSize();
+
+	bool clickOnUI = Engine::Input::GetMouseX() / ViewportSize.x <= xSize / 1280.0f;
+	glm::vec2 clickCoords = Engine::Input::GetMousePosition();
+	glm::vec2 inRenderCoords = { clickCoords.x / ViewportSize.x * 2 - 1, clickCoords.y / ViewportSize.y * 2 - 1 };
+	if (clickOnUI)
+	{
+		EG_TRACE("Click on UI");
+		UI->OnMouseClick(ToCameraSpace(m_UICamera, inRenderCoords));
+	}
+	else
+	{
+		EG_TRACE("Click on Workspace");
+		Workspace->OnMouseClick(ToCameraSpace(m_WorkspaceCamera, inRenderCoords));
+
+	}
+	return true;
+}
+
 void AppLayer::LoadScene()
 {
 	m_ActiveScene = Engine::CreateRef<Engine::Scene>();
@@ -62,21 +87,25 @@ void AppLayer::LoadScene()
 	// singletons "UIPanelEntity" and "WorkspaceEntity" scrips 
 	// that will manage the overall UI and Workspace states.
 
-	Engine::Entity m_UIPanelEntity = m_ActiveScene->CreateEntity("UIPanel");
-	Engine::NativeScriptComponent& nsc1 = m_UIPanelEntity.AddComponent<Engine::NativeScriptComponent>();
-	nsc1.Bind<UIManager>();
-	nsc1.Instance = nsc1.InstantiateScript(m_UIPanelEntity);
-	nsc1.Instance->OnCreate();
-	
-	// Native scripts instantiates automatticly in Scene::OnUpdate()
-	// But we need to instantiate Managers manually to get ability to work with 
-	// Native Scripts beforethe first call of Scene::OnUpdate()
-
-	Engine::Entity m_WorkspaceEntity = m_ActiveScene->CreateEntity("Workspace");
+	m_WorkspaceEntity = m_ActiveScene->CreateEntity("Workspace");
 	Engine::NativeScriptComponent& nsc2 = m_WorkspaceEntity.AddComponent<Engine::NativeScriptComponent>();
 	nsc2.Bind<WorkspaceManager>();
 	nsc2.Instance = nsc2.InstantiateScript(m_WorkspaceEntity);
 	nsc2.Instance->OnCreate();
+	
+	// Native scripts instantiates automatticly in Scene::OnUpdate()
+	// But we need to instantiate Managers manually to get ability to work with 
+	// Native Scripts before the first call of Scene::OnUpdate()
+
+	m_UIPanelEntity = m_ActiveScene->CreateEntity("UIPanel");
+	Engine::NativeScriptComponent& nsc1 = m_UIPanelEntity.AddComponent<Engine::NativeScriptComponent>();
+	nsc1.Bind<UIManager>();
+	nsc1.Instance = nsc1.InstantiateScript(m_UIPanelEntity);
+	// Gives UIManager ref on current state of editor
+	// Think about better solution
+	// Need to be set before OnCreate()
+	((UIManager*)nsc1.Instance)->SetCurrentState(((WorkspaceManager*)nsc2.Instance)->GetCurrentState());
+	nsc1.Instance->OnCreate();
 
 
 
@@ -84,9 +113,10 @@ void AppLayer::LoadScene()
 	float width = 1280;
 	m_UICamera = m_ActiveScene->CreateEntity("UICamera");
 	m_UICamera.AddComponent<Engine::CameraComponent>().Primary = false;
-	m_UICamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographic(height, 0.0f, 2.0f);
 	m_UICamera.GetComponent<Engine::TransformComponent>().Translation = { width / 2.0f, height / 2.0f, 11.0f }; //range 11 - 9, use 11 - 10
 	m_UICamera.GetComponent<Engine::TransformComponent>().Scale.y = -1.0f;
+	m_UICamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographic(height, 0.0f, 2.0f);
+
 
 	m_WorkspaceCamera = m_ActiveScene->CreateEntity("WorkspaceCamera");
 	m_WorkspaceCamera.AddComponent<Engine::CameraComponent>().Primary = true;
@@ -94,4 +124,17 @@ void AppLayer::LoadScene()
 
 	m_WorkspaceCamera.GetComponent<Engine::TransformComponent>().Translation.z = 2.0f; // range  2 - 0, use 1 - 0
 	m_WorkspaceCamera.AddComponent<Engine::NativeScriptComponent>().Bind<CameraController>();
+}
+
+glm::vec2 AppLayer::ToCameraSpace(Engine::Entity cameraEntity, const glm::vec2& coords)
+{
+	Engine::TransformComponent& transform = cameraEntity.GetComponent<Engine::TransformComponent>();
+	auto& camera = cameraEntity.GetComponent<Engine::CameraComponent>().Camera;
+
+	glm::mat4 inverseViewProjection = transform.GetTransform() * glm::inverse(camera.GetProjection());
+	glm::vec4 result = inverseViewProjection * glm::vec4{ coords.x, -coords.y, 1.0f, 1.0f };
+
+	//EG_TRACE("Click coordinates X: ", result.x, "         Y: ", result.y);
+
+	return glm::vec2{ result.x, result.y };
 }

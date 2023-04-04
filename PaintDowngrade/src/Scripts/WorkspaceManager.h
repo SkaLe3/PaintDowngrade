@@ -1,12 +1,11 @@
 #pragma once
 #include <Engine/Scene/ScriptableEntity.h>
 #include <Engine/Renderer/Texture.h>
+#include "Components/ShapeComponent.h"
+#include "SettingsState.h"
 
-enum class ActionType
-{
-	Cursor, Draw
-};
 
+// передавання об'єктів з даними від фронтенду реалізує патерн команда
 class WorkspaceManager final :public Engine::ScriptableEntity
 {
 public:
@@ -15,24 +14,29 @@ public:
 
 	virtual void OnCreate() override;
 	virtual void OnUpdate(Engine::Timestep ts) override {}
+	void OnMouseClick(const glm::vec2& coords);
 
-	void DrawEntity() {}
+	void DrawEntity(const glm::vec2& coords);
 	void DestroyEntity() {}
 
 
 
-
+	Engine::Ref<CurrentState> GetCurrentState() { return m_State; }
 public:
 	static WorkspaceManager* Get() {
 		EG_ASSERT(s_Instance, "WorkspaceManager has not been instantiated");
 		return s_Instance;
 	}
+
 private:
 	inline static WorkspaceManager* s_Instance = nullptr; // Singleton instance
 
 private:
+	// групи реалізують патерн компонувальник
 	Engine::Entity m_RootGroup;
 	std::unordered_map<std::string, Engine::Ref<Engine::Texture2D>> m_Textures;
 
 	std::vector<Engine::Entity> m_SelectedEntities;
+
+	Engine::Ref<CurrentState> m_State = Engine::CreateRef<CurrentState>();
 };

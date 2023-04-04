@@ -3,6 +3,7 @@
 #include "entt.hpp"
 #include "Engine/Core/Timestep.h"
 #include "Engine/Renderer/EditorCamera.h"
+#include <glm/glm.hpp>
 
 namespace Engine {
 
@@ -23,6 +24,7 @@ namespace Engine {
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		Entity GetPrimaryCameraEntity();
+		glm::vec2 GetViewportSize() { return glm::vec2{ m_ViewportWidth, m_ViewportHeiht }; }
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component) {}

@@ -14,6 +14,8 @@ struct ShapeComponent
 
 	ShapeComponent() = default;
 	ShapeComponent(const ShapeComponent&) = default;
+	ShapeComponent(ShapeType type, const glm::vec2& size, const glm::vec2& translate)
+		: Type(type), Size(size), LocalTranslate(translate) {}
 
 	//Radius is x coordinate devided by 2
 	//Because I don't have circle rendering yet

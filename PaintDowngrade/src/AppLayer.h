@@ -14,8 +14,12 @@ public:
 
 	bool OnMouseScroll(Engine::MouseScrolledEvent& e);
 	bool OnKeyPressed(Engine::KeyPressedEvent& e);
+	bool OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e);
 
 	void LoadScene();
+
+	glm::vec2 ToCameraSpace(Engine::Entity cameraEntity, const glm::vec2& coords);
+
 
 private:
 	Engine::Entity m_UICamera;

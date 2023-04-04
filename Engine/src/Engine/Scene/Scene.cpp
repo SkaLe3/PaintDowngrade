@@ -45,7 +45,7 @@ namespace Engine {
 				{
 					if (!nsc.Instance)
 					{
-						EG_TRACE("NativeScriptUpdate:", m_Registry.get<TagComponent>(entity).Tag);
+
 						nsc.Instance = nsc.InstantiateScript({ entity, this });
 						nsc.Instance->OnCreate();
 					}
@@ -64,16 +64,16 @@ namespace Engine {
 			{
 				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
 				mainCamera = &camera.Camera;
-				mainCameraTransform = transform.GetTransform();;
+				mainCameraTransform = transform.GetTransform();
 				Renderer2D::BeginScene(mainCamera->GetProjection(), mainCameraTransform);
 
 				auto view = m_Registry.view<SpriteRendererComponent>();
-				//for (auto entity : view)
+
 				for (auto entity = view.rbegin(), last = view.rend(); entity != last; ++entity) 
 				{
 						auto [transform, sprite] = m_Registry.get<TransformComponent, SpriteRendererComponent>(*entity);
 						Renderer2D::DrawSprite(transform.GetTransform(), sprite);
-					//EG_TRACE("Name:", m_Registry.get<TagComponent>(*entity).Tag);
+
 
 				}
 
