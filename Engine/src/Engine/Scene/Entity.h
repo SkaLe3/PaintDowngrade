@@ -44,6 +44,12 @@ namespace Engine {
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
+		void Destroy()
+		{
+			EG_ASSERT((m_EntityHandle != entt::null), "Entity does not exist");
+			m_Scene->m_Registry.destroy(m_EntityHandle);
+			m_EntityHandle = entt::null;
+		}
 		Scene* GetScene()
 		{
 			return m_Scene;

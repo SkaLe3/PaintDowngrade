@@ -6,7 +6,8 @@
 // Useable z range 10 - 11 
 void UIManager::OnCreate()
 {
-	EG_ASSERT(m_State, "Current State should be initialized before OnCreate!");
+	EG_ASSERT(m_Workspace, "Workspace pointer should be provided before UIManager::OnCreate!")
+	EG_ASSERT(m_State, "Current State should be initialized before UIManager::OnCreate!");
 
 	m_Textures["CursorButton"] = Engine::Texture2D::Create("assets/textures/CursorButton.png");
 	m_Textures["RectangleButton"] = Engine::Texture2D::Create("assets/textures/RectangleButton.png");
@@ -23,23 +24,23 @@ void UIManager::OnCreate()
 	spec.Position = { 20, 20, 10.1 };
 	spec.Color = { 1.0, 1.0, 1.0, 1.0 };
 	Engine::Entity ent = CreateUIElement(spec, m_Textures["CursorButton"]);
-	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectCursorModeCommand>(m_State));
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectCursorModeCommand>(m_Workspace, m_State));
 
 
 	spec.Name = "RectangleButton";
 	spec.Position.x = 80;
 	ent = CreateUIElement(spec, m_Textures["RectangleButton"]);
-	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectRectangleCommand>(m_State));
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectRectangleCommand>(m_Workspace, m_State));
 
 	spec.Name = "CircleButton";
 	spec.Position.x = 140;
 	ent = CreateUIElement(spec, m_Textures["CircleButton"]);
-	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectCircleCommand>(m_State));
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectCircleCommand>(m_Workspace, m_State));
 
 	spec.Name = "TriangleButton";
 	spec.Position.x = 200;
 	ent = CreateUIElement(spec, m_Textures["TriangleButton"]);
-	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectTriangleCommand>(m_State));
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectTriangleCommand>(m_Workspace, m_State));
 
 
 }

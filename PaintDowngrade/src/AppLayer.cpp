@@ -27,6 +27,7 @@ void AppLayer::OnUpdate(Engine::Timestep ts)
 	Engine::RenderCommand::SetClearColor({ 0.95f, 0.30f, 0.80f, 1.0f });
 	Engine::RenderCommand::Clear();
 
+
 	m_ActiveScene->OnUpdate(ts);
 	//EG_INFO("Time of frame:", ts);
 }
@@ -104,6 +105,7 @@ void AppLayer::LoadScene()
 	// Gives UIManager ref on current state of editor
 	// Think about better solution
 	// Need to be set before OnCreate()
+	((UIManager*)nsc1.Instance)->BindWorkspace(((WorkspaceManager*)nsc2.Instance));
 	((UIManager*)nsc1.Instance)->SetCurrentState(((WorkspaceManager*)nsc2.Instance)->GetCurrentState());
 	nsc1.Instance->OnCreate();
 

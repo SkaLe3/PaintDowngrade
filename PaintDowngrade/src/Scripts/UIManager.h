@@ -5,6 +5,7 @@
 #include <Engine/Core/Log.h>
 #include "Engine/Scene/Components.h"
 #include "SettingsState.h"
+#include "WorkspaceManager.h"
 
 
 // додати ButtonComponent реалізувавши патерн команда
@@ -36,6 +37,7 @@ public:
 
 
 	float GetXSize() { return m_PanelSize; }
+	void BindWorkspace(WorkspaceManager* workspace) { m_Workspace = workspace; }
 	void SetCurrentState(Engine::Ref<CurrentState> state) { m_State = state; }
 
 public:
@@ -51,5 +53,6 @@ private:
 	std::unordered_map<std::string, Engine::Ref<Engine::Texture2D>> m_Textures;
 	float m_PanelSize;
 
+	WorkspaceManager* m_Workspace = nullptr;
 	Engine::Ref<CurrentState> m_State = nullptr;
 };

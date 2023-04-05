@@ -13,12 +13,15 @@ public:
 	virtual ~WorkspaceManager() { s_Instance = nullptr; };
 
 	virtual void OnCreate() override;
-	virtual void OnUpdate(Engine::Timestep ts) override {}
+	virtual void OnUpdate(Engine::Timestep ts) override;
 	void OnMouseClick(const glm::vec2& coords);
 
 	void DrawEntity(const glm::vec2& coords);
 	void DestroyEntity() {}
+	void EnableFollowCursorShape();
+	void DisableFollowCursorShape();
 
+	glm::vec2 ToCameraSpace(const glm::vec2& coords);
 
 
 	Engine::Ref<CurrentState> GetCurrentState() { return m_State; }
@@ -39,4 +42,6 @@ private:
 	std::vector<Engine::Entity> m_SelectedEntities;
 
 	Engine::Ref<CurrentState> m_State = Engine::CreateRef<CurrentState>();
+
+	Engine::Entity m_FollowCursorShape;
 };

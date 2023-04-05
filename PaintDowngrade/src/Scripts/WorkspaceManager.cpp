@@ -2,6 +2,7 @@
 #include <Engine/Scene/Components.h>
 #include "Components/ShapeComponent.h"
 #include "GroupScript.h"
+#include <Engine/Core/Input.h>
 
 #define stringify( name ) #name
 
@@ -20,10 +21,9 @@ void WorkspaceManager::OnCreate()
 	m_Textures["Circle"] = Engine::Texture2D::Create("assets/textures/Circle.png");
 	m_Textures["Frame"] = Engine::Texture2D::Create("assets/textures/Frame.png");
 	m_Textures["Rectangle"] = nullptr;
-	//m_Textures["Rectangle"] = Engine::Texture2D::Create(1, 1);
-		//s_Data.WhiteTexture = Texture2D::Create(1, 1);
-	//uint32_t whiteTextureData = 0xffffffff;
-	//s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+	
+	m_State->m_Action = ActionType::Cursor;
+	m_State->m_Shape = ShapeType::Rectangle;
 
 
 	m_RootGroup = m_Entity.GetScene()->CreateEntity("RootGroup");
@@ -39,9 +39,30 @@ void WorkspaceManager::OnCreate()
 	sc.Size.y = tc.Scale.y = 450;
 	tc.Translation.z = 0.01f;
 
-	m_State->m_Shape = ShapeType::Circle;
-	DrawEntity(glm::vec2{200, 150});
 
+}
+
+void WorkspaceManager::OnUpdate(Engine::Timestep ts)
+{
+
+	if(m_State->m_Action == ActionType::Draw)
+	{
+		glm::vec2 ViewportSize = m_Entity.GetScene()->GetViewportSize();
+		glm::vec2 clickCoords = Engine::Input::GetMousePosition();
+		glm::vec2 inRenderCoords = { clickCoords.x / ViewportSize.x * 2 - 1, clickCoords.y / ViewportSize.y * 2 - 1 };
+		glm::vec2 spaceCoords = ToCameraSpace(inRenderCoords);
+
+
+		if (m_FollowCursorShape) 
+		{
+			auto& tc = m_FollowCursorShape.GetComponent<Engine::TransformComponent>();
+			tc.Translation.x = spaceCoords.x;
+			tc.Translation.y = spaceCoords.y;
+			tc.Scale.x = m_State->Size.x;
+			tc.Scale.y = m_State->Size.y;
+			auto& src = m_FollowCursorShape.GetComponent<Engine::SpriteRendererComponent>();
+		}
+	}
 }
 
 void WorkspaceManager::OnMouseClick(const glm::vec2& coords)
@@ -69,5 +90,40 @@ void WorkspaceManager::DrawEntity(const glm::vec2& coords)
 	newEntity.AddComponent<ShapeComponent>(m_State->m_Shape, m_State->Size, glm::vec2{ tc.Translation.x, tc.Translation.y});
 	((Group*)m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->Push(newEntity);
 
+	DisableFollowCursorShape();
+	EnableFollowCursorShape();
+}
 
+void WorkspaceManager::EnableFollowCursorShape()
+{
+	//EG_ASSERT(!m_FollowCursorShape, "Attempt to create FollowCursorShape when it already exist!");
+	if (!m_FollowCursorShape)
+	{
+		m_FollowCursorShape = m_Entity.GetScene()->CreateEntity("FollowCursor");
+		auto& tc = m_FollowCursorShape.GetComponent<Engine::TransformComponent>();
+		tc.Translation.z = 0.99f;
+		auto& src = m_FollowCursorShape.AddComponent<Engine::SpriteRendererComponent>(m_State->Color);
+		src.Color.w = 0.3f;
+	}
+	m_FollowCursorShape.GetComponent<Engine::SpriteRendererComponent>().Texture = m_Textures[enum_to_str[(int)m_State->m_Shape]];
+}
+
+void WorkspaceManager::DisableFollowCursorShape()
+{
+	if (m_FollowCursorShape)
+		m_FollowCursorShape.Destroy();
+}
+
+glm::vec2 WorkspaceManager::ToCameraSpace(const glm::vec2& coords)
+{
+	Engine::Entity cameraEntity = m_Entity.GetScene()->GetPrimaryCameraEntity();
+	Engine::TransformComponent& transform = cameraEntity.GetComponent<Engine::TransformComponent>();
+	auto& camera = cameraEntity.GetComponent<Engine::CameraComponent>().Camera;
+
+	glm::mat4 inverseViewProjection = transform.GetTransform() * glm::inverse(camera.GetProjection());
+	glm::vec4 result = inverseViewProjection * glm::vec4{ coords.x, -coords.y, 1.0f, 1.0f };
+
+	//EG_TRACE("Click coordinates X: ", result.x, "         Y: ", result.y);
+
+	return glm::vec2{ result.x, result.y };
 }
