@@ -30,6 +30,7 @@ public:
 	virtual void OnCreate() override;
 	virtual void OnUpdate(Engine::Timestep ts) override {}
 	void OnMouseClick(const glm::vec2& coords);
+	void OnMouseReleased();
 	void OnKeyPressed(Engine::KeyCode key);
 
 public:

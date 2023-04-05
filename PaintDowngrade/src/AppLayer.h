@@ -15,6 +15,7 @@ public:
 	bool OnMouseScroll(Engine::MouseScrolledEvent& e);
 	bool OnKeyPressed(Engine::KeyPressedEvent& e);
 	bool OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e);
+	bool OnMouseButtonReleased(Engine::MouseButtonReleasedEvent& e);
 
 	void LoadScene();
 

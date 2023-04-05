@@ -38,6 +38,7 @@ void AppLayer::OnEvent(Engine::Event& e)
 	dispatcher.Dispatch<Engine::KeyPressedEvent>(BIND_EVENT_FN(AppLayer::OnKeyPressed));
 	dispatcher.Dispatch<Engine::MouseScrolledEvent>(BIND_EVENT_FN(AppLayer::OnMouseScroll));
 	dispatcher.Dispatch<Engine::MouseButtonPressedEvent>(BIND_EVENT_FN(AppLayer::OnMouseButtonPressed));
+	dispatcher.Dispatch<Engine::MouseButtonReleasedEvent>(BIND_EVENT_FN(AppLayer::OnMouseButtonReleased));
 
 }
 
@@ -79,6 +80,13 @@ bool AppLayer::OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e)
 		Workspace->OnMouseClick(ToCameraSpace(m_WorkspaceCamera, inRenderCoords));
 
 	}
+	return true;
+}
+
+bool AppLayer::OnMouseButtonReleased(Engine::MouseButtonReleasedEvent& e)
+{
+	UIManager* UI = (UIManager*)m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
+	UI->OnMouseReleased();
 	return true;
 }
 
