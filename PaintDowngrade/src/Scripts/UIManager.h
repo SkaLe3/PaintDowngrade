@@ -6,6 +6,7 @@
 #include "Engine/Scene/Components.h"
 #include "SettingsState.h"
 #include "WorkspaceManager.h"
+#include <Engine/Core/KeyCodes.h>
 
 
 // додати ButtonComponent реалізувавши патерн команда
@@ -29,6 +30,7 @@ public:
 	virtual void OnCreate() override;
 	virtual void OnUpdate(Engine::Timestep ts) override {}
 	void OnMouseClick(const glm::vec2& coords);
+	void OnKeyPressed(Engine::KeyCode key);
 
 public:
 	Engine::Entity CreateUIElement(const UIElementSpecification& spec, Engine::Ref<Engine::Texture2D> texture = nullptr);

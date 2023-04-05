@@ -89,4 +89,47 @@ public:
 	}
 };
 
+class SelectColorCommand : public Command
+{
+public:
+	SelectColorCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state, const glm::vec4& color) 
+		: Command(workspace, state), m_Color(color) {}
 
+	virtual void Execute()
+	{
+		m_State->Color = m_Color;
+	}
+private:
+	glm::vec4 m_Color;
+};
+
+
+class ChangeXsizeCommand : public Command
+{
+public:
+	ChangeXsizeCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state, float factor)
+		: Command(workspace, state), m_Factor(factor) {}
+
+	virtual void Execute()
+	{
+		m_State->Size.x += m_Factor;
+		m_State->Size.x = glm::clamp(m_State->Size.x, 1.0f, 300.0f);
+	}
+private:
+	float m_Factor;
+};
+
+class ChangeYsizeCommand : public Command
+{
+public:
+	ChangeYsizeCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state, float factor)
+		: Command(workspace, state), m_Factor(factor) {}
+
+	virtual void Execute()
+	{
+		m_State->Size.y += m_Factor;
+		m_State->Size.y = glm::clamp(m_State->Size.y, 1.0f, 300.0f);
+	}
+private:
+	float m_Factor;
+};

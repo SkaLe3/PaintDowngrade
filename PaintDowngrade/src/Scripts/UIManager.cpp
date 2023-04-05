@@ -1,5 +1,6 @@
 #include "UIManager.h"
 #include <Engine/Scene/Components.h>
+#include <Engine/Core/Input.h>
 #include "Components/ButtonComponent.h"
 #include "Commands.h"
 
@@ -13,6 +14,10 @@ void UIManager::OnCreate()
 	m_Textures["RectangleButton"] = Engine::Texture2D::Create("assets/textures/RectangleButton.png");
 	m_Textures["TriangleButton"] = Engine::Texture2D::Create("assets/textures/TriangleButton.png");
 	m_Textures["CircleButton"] = Engine::Texture2D::Create("assets/textures/CircleButton.png");
+	m_Textures["SizeX"] = Engine::Texture2D::Create("assets/textures/sizex.png");
+	m_Textures["SizeY"] = Engine::Texture2D::Create("assets/textures/sizey.png");
+	m_Textures["ArrowRight"] = Engine::Texture2D::Create("assets/textures/ArrowRight.png");
+	m_Textures["ArrowLeft"] = Engine::Texture2D::Create("assets/textures/ArrowLeft.png");
 
 
 	m_PanelSize = 280.0f;
@@ -42,6 +47,103 @@ void UIManager::OnCreate()
 	ent = CreateUIElement(spec, m_Textures["TriangleButton"]);
 	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectTriangleCommand>(m_Workspace, m_State));
 
+	spec.Name = "WhiteColor";
+	spec.Size = { 30, 30 };
+	spec.Position.x = 20;
+	spec.Position.y = 630;
+	spec.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "BlackColor";
+	spec.Position.x = 70;
+	spec.Color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "RedColor";
+	spec.Position.x = 120;
+	spec.Color = { 0.85f, 0.15f, 0.15f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "GreenColor";
+	spec.Position.x = 170;
+	spec.Color = { 0.15f, 0.85f, 0.15f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "BlueColor";
+	spec.Position.x = 220;
+	spec.Color = { 0.15f, 0.15f, 0.85f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "LightGreyColor";
+	spec.Position.x = 20;
+	spec.Position.y = 680;
+	spec.Color = { 0.8f, 0.8f, 0.8f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "DarkGreyColor";
+	spec.Position.x = 70;
+	spec.Color = { 0.4f, 0.4f, 0.4f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "PurpleColor";
+	spec.Position.x = 120;
+	spec.Color = { 0.5f, 0.15f, 0.85f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "YellowColor";
+	spec.Position.x = 170;
+	spec.Color = { 0.85f, 0.85f, 0.15f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "CyanColor";
+	spec.Position.x = 220;
+	spec.Color = { 0.15f, 0.85f, 0.85f, 1.0f };
+	ent = CreateUIElement(spec);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
+
+	spec.Name = "SizeX";
+	spec.Position.x = 60;
+	spec.Position.y = 80;
+	spec.Size = { 160, 40 };
+	spec.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	CreateUIElement(spec, m_Textures["SizeX"]);
+
+	spec.Name = "SizeY";
+	spec.Position.y = 140;
+	CreateUIElement(spec, m_Textures["SizeY"]);
+
+	spec.Name = "XarrowLeft";
+	spec.Position.x = 20;
+	spec.Position.y = 85;
+	spec.Size = { 30, 30 };
+	ent = CreateUIElement(spec, m_Textures["ArrowLeft"]);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<ChangeXsizeCommand>(m_Workspace, m_State, -3));
+
+	spec.Name = "XarrowRight";
+	spec.Position.x = 230;
+	ent = CreateUIElement(spec, m_Textures["ArrowRight"]);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<ChangeXsizeCommand>(m_Workspace, m_State, 3));
+
+	spec.Name = "YarrowLeft";
+	spec.Position.x = 20;
+	spec.Position.y = 145;
+	ent = CreateUIElement(spec, m_Textures["ArrowLeft"]);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<ChangeYsizeCommand>(m_Workspace, m_State, -3));
+
+	spec.Name = "YarrowRight";
+	spec.Position.x = 230;
+	spec.Position.y = 145;
+	ent = CreateUIElement(spec, m_Textures["ArrowRight"]);
+	ent.AddComponent<ButtonComponent>(Engine::CreateRef<ChangeYsizeCommand>(m_Workspace, m_State, 3));
 
 }
 
@@ -63,6 +165,45 @@ void UIManager::OnMouseClick(const glm::vec2& coords)
 	}
 }
 
+
+void UIManager::OnKeyPressed(Engine::KeyCode key)
+{
+	int32_t value = 1;
+	bool controlPressed = Engine::Input::IsKeyPressed(Engine::Key::LeftControl) || Engine::Input::IsKeyPressed(Engine::Key::RightControl);
+	switch (key)
+	{
+		case Engine::Key::Left:
+		{
+			if (controlPressed) value = 5;
+			ChangeXsizeCommand command(m_Workspace, m_State, -value);
+			command.Execute();
+			break;
+		}
+		case Engine::Key::Right:
+		{
+			if (controlPressed) value = 5;
+			ChangeXsizeCommand command(m_Workspace, m_State, value);
+			command.Execute();
+			break;
+		}
+		case Engine::Key::Down:
+		{
+			if (controlPressed) value = 5;
+			ChangeYsizeCommand command(m_Workspace, m_State, -value);
+			command.Execute();
+			break;
+		}
+		case Engine::Key::Up:
+		{
+			if (controlPressed) value = 5;
+			ChangeYsizeCommand command(m_Workspace, m_State, value);
+			command.Execute();
+			break;
+		}
+
+
+	}
+}
 
 Engine::Entity UIManager::CreateUIElement(const UIElementSpecification& spec, Engine::Ref<Engine::Texture2D> texture)
 {

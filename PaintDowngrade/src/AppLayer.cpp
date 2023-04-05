@@ -47,12 +47,14 @@ bool AppLayer::OnMouseScroll(Engine::MouseScrolledEvent& e)
 
 	float value = m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.GetOrthographicSize();
 	m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographicSize(value + delta);
+	static_cast<CameraController*>(m_WorkspaceCamera.GetComponent<Engine::NativeScriptComponent>().Instance)->SetCameraZoomLevel(value + delta);
 	return true;
 }
 
 bool AppLayer::OnKeyPressed(Engine::KeyPressedEvent& e)
 {
-
+	UIManager* UI = (UIManager*)m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
+	UI->OnKeyPressed(e.GetKeyCode());
 	return true;
 }
 

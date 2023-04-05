@@ -60,7 +60,11 @@ void WorkspaceManager::OnUpdate(Engine::Timestep ts)
 			tc.Translation.y = spaceCoords.y;
 			tc.Scale.x = m_State->Size.x;
 			tc.Scale.y = m_State->Size.y;
+			if (m_State->m_Shape == ShapeType::Circle)
+				tc.Scale.y = tc.Scale.x;
 			auto& src = m_FollowCursorShape.GetComponent<Engine::SpriteRendererComponent>();
+			src.Color = m_State->Color;
+			src.Color.w = 0.3f;
 		}
 	}
 }
@@ -73,7 +77,7 @@ void WorkspaceManager::OnMouseClick(const glm::vec2& coords)
 
 void WorkspaceManager::DrawEntity(const glm::vec2& coords)
 {
-
+	static float index = 0.00001f;
 
 	Engine::Entity newEntity = m_Entity.GetScene()->CreateEntity(enum_to_str[(int)m_State->m_Shape]);
 	auto& src = newEntity.AddComponent<Engine::SpriteRendererComponent>(m_State->Color);
@@ -83,15 +87,18 @@ void WorkspaceManager::DrawEntity(const glm::vec2& coords)
 
 	tc.Scale.x = m_State->Size.x;
 	tc.Scale.y = m_State->Size.y;
+	if (m_State->m_Shape == ShapeType::Circle)
+		tc.Scale.y = tc.Scale.x;
 	tc.Translation.x = coords.x;
 	tc.Translation.y = coords.y;
-	tc.Translation.z = 0.02f;
+	tc.Translation.z = 0.02f + index;
 
 	newEntity.AddComponent<ShapeComponent>(m_State->m_Shape, m_State->Size, glm::vec2{ tc.Translation.x, tc.Translation.y});
 	((Group*)m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->Push(newEntity);
 
 	DisableFollowCursorShape();
 	EnableFollowCursorShape();
+	index += 0.00001f;
 }
 
 void WorkspaceManager::EnableFollowCursorShape()
