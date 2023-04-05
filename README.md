@@ -6,7 +6,7 @@ This editor is a laboratory assignment for my programming class at the universit
 # How to try
 
 1.Downloading the repository: 
-Start by cloning the repository with git clone --recursive https://github.com/SkaLe3/GameEngine
+Start by cloning the repository with git clone --recursive https://github.com/SkaLe3/PaintDowngrade
 
 2.Generating solution: 
 After cloning run GenerateProjects.bat script file to generate a Visual Studio 2022 solution file
