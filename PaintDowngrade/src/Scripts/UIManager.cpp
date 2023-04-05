@@ -10,6 +10,7 @@ void UIManager::OnCreate()
 	EG_ASSERT(m_Workspace, "Workspace pointer should be provided before UIManager::OnCreate!");
 	EG_ASSERT(m_State, "Current State should be initialized before UIManager::OnCreate!");
 
+	m_Textures["UIPanel"] = Engine::Texture2D::Create("assets/textures/Panel.png");
 	m_Textures["CursorButton"] = Engine::Texture2D::Create("assets/textures/CursorButton.png");
 	m_Textures["RectangleButton"] = Engine::Texture2D::Create("assets/textures/RectangleButton.png");
 	m_Textures["TriangleButton"] = Engine::Texture2D::Create("assets/textures/TriangleButton.png");
@@ -21,10 +22,16 @@ void UIManager::OnCreate()
 	m_Textures["OnClickColor"] = Engine::Texture2D::Create("assets/textures/OnClickColor.png");
 	m_Textures["RealColor"] = Engine::Texture2D::Create("assets/textures/RealColor.png");
 
+	m_Textures["GroupButton"] = Engine::Texture2D::Create("assets/textures/GroupButton.png");
+	m_Textures["UngroupButton"] = Engine::Texture2D::Create("assets/textures/UngroupButton.png");
+	m_Textures["AddToGroupButton"] = Engine::Texture2D::Create("assets/textures/AddToGroupButton.png");
+	m_Textures["RemoveFromGroupButton"] = Engine::Texture2D::Create("assets/textures/RemoveFromGroupButton.png");
+	m_Textures["MergeGroupsButton"] = Engine::Texture2D::Create("assets/textures/MergeGroupsButton.png");
+
 
 	m_PanelSize = 280.0f;
-	UIElementSpecification spec{ "UIPanel", {m_PanelSize, 720 }, { 0, 0, 10 }, {0.3, 0.3, 0.3, 1.0f} };
-	CreateUIElement(spec); 
+	UIElementSpecification spec{ "UIPanel", {m_PanelSize, 720 }, { 0, 0, 10 }, {1.0, 1.0, 1.0, 1.0f} };
+	CreateUIElement(spec, m_Textures["UIPanel"]);
 
 	spec.Name = "CursorButton";
 	spec.Size = { 40, 40 };
@@ -262,6 +269,61 @@ void UIManager::OnCreate()
 		bc.OnClickTexture = bc.RealTexture;
 	}
 
+	spec.Name = "GroupButton";
+	spec.Position.x = 15;
+	spec.Position.y = 460;
+	spec.Size = { 120, 30 };
+	ent = CreateUIElement(spec, m_Textures["GroupButton"]);
+	{
+		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<GroupCommand>(m_Workspace, m_State));
+		bc.RealColor = spec.Color;
+		bc.RealTexture = m_Textures["GroupButton"];
+		bc.OnClickTexture = bc.RealTexture;
+	}
+
+	spec.Name = "UngroupButton";
+	spec.Position.x = 145;
+	ent = CreateUIElement(spec, m_Textures["UngroupButton"]);
+	{
+		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<UngroupCommand>(m_Workspace, m_State));
+		bc.RealColor = spec.Color;
+		bc.RealTexture = m_Textures["UngroupButton"];
+		bc.OnClickTexture = bc.RealTexture;
+	}
+
+	spec.Name = "AddToGroupButton";
+	spec.Position.x = 15;
+	spec.Position.y += 50;
+	ent = CreateUIElement(spec, m_Textures["AddToGroupButton"]);
+	{
+		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<AddToGroupCommand>(m_Workspace, m_State));
+		bc.RealColor = spec.Color;
+		bc.RealTexture = m_Textures["AddToGroupButton"];
+		bc.OnClickTexture = bc.RealTexture;
+	}
+
+	spec.Name = "RemoveFromGroupButton";
+	spec.Position.x = 145;
+	ent = CreateUIElement(spec, m_Textures["RemoveFromGroupButton"]);
+	{
+		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<RemoveFromGroupCommand>(m_Workspace, m_State));
+		bc.RealColor = spec.Color;
+		bc.RealTexture = m_Textures["RemoveFromGroupButton"];
+		bc.OnClickTexture = bc.RealTexture;
+	}
+
+	spec.Name = "MergeGroupsButton";
+	spec.Position.x = 15;
+	spec.Position.y += 50;
+	ent = CreateUIElement(spec, m_Textures["MergeGroupsButton"]);
+	{
+		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<MergeGroupsCommand>(m_Workspace, m_State));
+		bc.RealColor = spec.Color;
+		bc.RealTexture = m_Textures["MergeGroupsButton"];
+		bc.OnClickTexture = bc.RealTexture;
+	}
+
+
 }
 
 void UIManager::OnMouseClick(const glm::vec2& coords)
@@ -341,33 +403,30 @@ void UIManager::OnMouseReleased()
 void UIManager::OnKeyPressed(Engine::KeyCode key)
 {
 	int32_t value = 1;
-	bool controlPressed = Engine::Input::IsKeyPressed(Engine::Key::LeftControl) || Engine::Input::IsKeyPressed(Engine::Key::RightControl);
+	bool shiftPressed = Engine::Input::IsKeyPressed(Engine::Key::LeftShift) || Engine::Input::IsKeyPressed(Engine::Key::RightShift);
+	if (shiftPressed) value = 5;
 	switch (key)
 	{
 		case Engine::Key::Left:
 		{
-			if (controlPressed) value = 5;
 			ChangeXsizeCommand command(m_Workspace, m_State, -value);
 			command.Execute();
 			break;
 		}
 		case Engine::Key::Right:
 		{
-			if (controlPressed) value = 5;
 			ChangeXsizeCommand command(m_Workspace, m_State, value);
 			command.Execute();
 			break;
 		}
 		case Engine::Key::Down:
 		{
-			if (controlPressed) value = 5;
 			ChangeYsizeCommand command(m_Workspace, m_State, -value);
 			command.Execute();
 			break;
 		}
 		case Engine::Key::Up:
 		{
-			if (controlPressed) value = 5;
 			ChangeYsizeCommand command(m_Workspace, m_State, value);
 			command.Execute();
 			break;

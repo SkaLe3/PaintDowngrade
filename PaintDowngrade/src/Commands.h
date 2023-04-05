@@ -133,3 +133,70 @@ public:
 private:
 	float m_Factor;
 };
+
+
+
+class GroupCommand : public Command
+{
+public:
+	GroupCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
+		: Command(workspace, state) {}
+
+	virtual void Execute()
+	{
+		m_Workspace->Group();
+	}
+
+};
+
+class UngroupCommand : public Command
+{
+public:
+	UngroupCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
+		: Command(workspace, state) {}
+
+	virtual void Execute()
+	{
+		m_Workspace->Ungroup();
+	}
+
+};
+
+class AddToGroupCommand : public Command
+{
+public:
+	AddToGroupCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
+		: Command(workspace, state) {}
+
+	virtual void Execute()
+	{
+		m_Workspace->AddToGroup();
+	}
+
+};
+
+class RemoveFromGroupCommand : public Command
+{
+public:
+	RemoveFromGroupCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
+		: Command(workspace, state) {}
+
+	virtual void Execute()
+	{
+		m_Workspace->RemoveFromGroup();
+	}
+
+};
+
+class MergeGroupsCommand : public Command
+{
+public:
+	MergeGroupsCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
+		: Command(workspace, state) {}
+
+	virtual void Execute()
+	{
+		m_Workspace->MergeGroups();
+	}
+
+};

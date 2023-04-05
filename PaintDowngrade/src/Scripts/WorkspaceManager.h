@@ -16,10 +16,27 @@ public:
 	virtual void OnUpdate(Engine::Timestep ts) override;
 	void OnMouseClick(const glm::vec2& coords);
 
-	void DrawEntity(const glm::vec2& coords);
-	void DestroyEntity() {}
 	void EnableFollowCursorShape();
 	void DisableFollowCursorShape();
+
+
+	void DrawEntity(const glm::vec2& coords);
+
+
+	void DestroyEntity() {}
+	void Group() {}
+	void Ungroup() {}
+	void AddToGroup() {}
+	void RemoveFromGroup() {}
+	void MergeGroups() {}
+	void Copy() {}
+	void Move() {}
+	void Undo() {}
+	void Redo() {}
+	void Clear() {}
+
+	void Serialize() {}
+	void Deserialize() {}
 
 	glm::vec2 ToCameraSpace(const glm::vec2& coords);
 

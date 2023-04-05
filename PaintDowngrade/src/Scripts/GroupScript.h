@@ -1,10 +1,10 @@
 #pragma once
 #include <Engine/Scene/ScriptableEntity.h>
 
-class Group final : public Engine::ScriptableEntity
+class GroupScript final : public Engine::ScriptableEntity
 {
 public:
-	Group(Engine::Entity entity) : Engine::ScriptableEntity(entity) {}
+	GroupScript(Engine::Entity entity) : Engine::ScriptableEntity(entity) {}
 
 	virtual void OnCreate() override {}
 	virtual void OnUpdate(Engine::Timestep ts) override {}

@@ -11,7 +11,7 @@ static const char* enum_to_str[] = {
 	stringify(Rectangle),
 	stringify(Circle),
 	stringify(Triangle),
-	stringify(Group)
+	stringify(GroupScript)
 };
 
 // Usable range 0.01 - 1
@@ -32,7 +32,7 @@ void WorkspaceManager::OnCreate()
 	m_RootGroup.AddComponent<Engine::SpriteRendererComponent>(glm::vec4{ 0.95f, 0.95f, 0.95f, 1.0f });
 	Engine::TransformComponent& tc = m_RootGroup.GetComponent<Engine::TransformComponent>();
 	Engine::NativeScriptComponent& nsc = m_RootGroup.AddComponent<Engine::NativeScriptComponent>();
-	nsc.Bind<Group>();
+	nsc.Bind<GroupScript>();
 	nsc.Instance = nsc.InstantiateScript(m_RootGroup);
 	nsc.Instance->OnCreate();
 	sc.Size.x = tc.Scale.x = 800;
@@ -94,7 +94,7 @@ void WorkspaceManager::DrawEntity(const glm::vec2& coords)
 	tc.Translation.z = 0.02f + index;
 
 	newEntity.AddComponent<ShapeComponent>(m_State->m_Shape, m_State->Size, glm::vec2{ tc.Translation.x, tc.Translation.y});
-	((Group*)m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->Push(newEntity);
+	((GroupScript*)m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->Push(newEntity);
 
 	DisableFollowCursorShape();
 	EnableFollowCursorShape();
