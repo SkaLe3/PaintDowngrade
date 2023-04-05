@@ -40,6 +40,8 @@ void AppLayer::OnEvent(Engine::Event& e)
 	dispatcher.Dispatch<Engine::MouseButtonPressedEvent>(BIND_EVENT_FN(AppLayer::OnMouseButtonPressed));
 	dispatcher.Dispatch<Engine::MouseButtonReleasedEvent>(BIND_EVENT_FN(AppLayer::OnMouseButtonReleased));
 
+	dispatcher.Dispatch<Engine::WindowResizeEvent>(BIND_EVENT_FN(AppLayer::OnWindowResize));
+
 }
 
 bool AppLayer::OnMouseScroll(Engine::MouseScrolledEvent& e)
@@ -47,7 +49,8 @@ bool AppLayer::OnMouseScroll(Engine::MouseScrolledEvent& e)
 	float delta = e.GetYOffset() * 10;
 
 	float value = m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.GetOrthographicSize();
-	m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographicSize(value + delta);
+
+	m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographicSize(glm::clamp(value + delta, 30.0f, 500.0f));
 	static_cast<CameraController*>(m_WorkspaceCamera.GetComponent<Engine::NativeScriptComponent>().Instance)->SetCameraZoomLevel(value + delta);
 	return true;
 }
@@ -65,8 +68,8 @@ bool AppLayer::OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e)
 	UIManager* UI = (UIManager*)m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
 	WorkspaceManager* Workspace = (WorkspaceManager*)m_WorkspaceEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
 	float xSize = UI->GetXSize();
-
-	bool clickOnUI = Engine::Input::GetMouseX() / ViewportSize.x <= xSize / 1280.0f;
+	float aspectRatio = ViewportSize.x / ViewportSize.y;
+	bool clickOnUI = Engine::Input::GetMouseX() / ViewportSize.x <= xSize / (720.0f * aspectRatio);
 	glm::vec2 clickCoords = Engine::Input::GetMousePosition();
 	glm::vec2 inRenderCoords = { clickCoords.x / ViewportSize.x * 2 - 1, clickCoords.y / ViewportSize.y * 2 - 1 };
 	if (clickOnUI)
@@ -87,6 +90,13 @@ bool AppLayer::OnMouseButtonReleased(Engine::MouseButtonReleasedEvent& e)
 {
 	UIManager* UI = (UIManager*)m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
 	UI->OnMouseReleased();
+	return true;
+}
+
+bool AppLayer::OnWindowResize(Engine::WindowResizeEvent& e)
+{
+	m_ActiveScene->OnViewportResize(e.GetWidth(), e.GetHeight());
+	RecalculateUICamera(glm::vec2{ e.GetWidth(), e.GetHeight() });
 	return true;
 }
 
@@ -120,14 +130,9 @@ void AppLayer::LoadScene()
 	nsc1.Instance->OnCreate();
 
 
-
-	float height = 720;
-	float width = 1280;
 	m_UICamera = m_ActiveScene->CreateEntity("UICamera");
 	m_UICamera.AddComponent<Engine::CameraComponent>().Primary = false;
-	m_UICamera.GetComponent<Engine::TransformComponent>().Translation = { width / 2.0f, height / 2.0f, 11.0f }; //range 11 - 9, use 11 - 10
-	m_UICamera.GetComponent<Engine::TransformComponent>().Scale.y = -1.0f;
-	m_UICamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographic(height, 0.0f, 2.0f);
+	RecalculateUICamera(m_ActiveScene->GetViewportSize());
 
 
 	m_WorkspaceCamera = m_ActiveScene->CreateEntity("WorkspaceCamera");
@@ -149,4 +154,14 @@ glm::vec2 AppLayer::ToCameraSpace(Engine::Entity cameraEntity, const glm::vec2& 
 	//EG_TRACE("Click coordinates X: ", result.x, "         Y: ", result.y);
 
 	return glm::vec2{ result.x, result.y };
+}
+
+void AppLayer::RecalculateUICamera(const glm::vec2& viewport)
+{
+	float aspectRatio = viewport.x / viewport.y;
+	float height = 720;
+	float width = height * aspectRatio;
+	m_UICamera.GetComponent<Engine::TransformComponent>().Translation = { width / 2.0f, height / 2.0f, 11.0f }; //range 11 - 9, use 11 - 10
+	m_UICamera.GetComponent<Engine::TransformComponent>().Scale.y = -1.0f;
+	m_UICamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographic(height, 0.0f, 2.0f);
 }

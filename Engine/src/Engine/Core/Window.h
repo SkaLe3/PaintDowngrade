@@ -39,6 +39,7 @@ namespace Engine {
 		virtual bool IsVSync() const = 0;
 
 		virtual void* GetNativeWindow() const = 0;
+		virtual void SetWindowIcon(const char* path) = 0;
 
 		static std::unique_ptr<Window> Create(const WindowProperties& props = WindowProperties());
 	};

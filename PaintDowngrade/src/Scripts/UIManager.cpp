@@ -7,7 +7,7 @@
 // Useable z range 10 - 11 
 void UIManager::OnCreate()
 {
-	EG_ASSERT(m_Workspace, "Workspace pointer should be provided before UIManager::OnCreate!")
+	EG_ASSERT(m_Workspace, "Workspace pointer should be provided before UIManager::OnCreate!");
 	EG_ASSERT(m_State, "Current State should be initialized before UIManager::OnCreate!");
 
 	m_Textures["CursorButton"] = Engine::Texture2D::Create("assets/textures/CursorButton.png");

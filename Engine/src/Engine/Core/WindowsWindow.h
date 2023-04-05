@@ -25,6 +25,8 @@ namespace Engine {
 
 		virtual void* GetNativeWindow() const{ return m_Window; }
 
+		virtual void SetWindowIcon(const char* path);
+
 	private:
 		virtual void Init(const WindowProperties& props);
 		virtual void Shutdown();

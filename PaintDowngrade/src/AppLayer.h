@@ -16,10 +16,12 @@ public:
 	bool OnKeyPressed(Engine::KeyPressedEvent& e);
 	bool OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e);
 	bool OnMouseButtonReleased(Engine::MouseButtonReleasedEvent& e);
+	bool OnWindowResize(Engine::WindowResizeEvent& e);
 
 	void LoadScene();
 
 	glm::vec2 ToCameraSpace(Engine::Entity cameraEntity, const glm::vec2& coords);
+	void RecalculateUICamera(const glm::vec2& viewport);
 
 
 private:

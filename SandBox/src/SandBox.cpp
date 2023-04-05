@@ -19,6 +19,7 @@ public:
 	SandBoxApp() : Application("SandBox2D")
 	{
 		PushLayer(new Sandbox2D);
+		GetWindow().SetWindowIcon("assets/textures/CursorButton");
 	}
 	~SandBoxApp()
 	{
