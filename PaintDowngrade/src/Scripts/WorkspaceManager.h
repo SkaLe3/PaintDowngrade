@@ -5,7 +5,7 @@
 #include "SettingsState.h"
 
 
-// передавання об'єктів з даними від фронтенду реалізує патерн команда
+
 class WorkspaceManager final :public Engine::ScriptableEntity
 {
 public:
@@ -15,6 +15,7 @@ public:
 	virtual void OnCreate() override;
 	virtual void OnUpdate(Engine::Timestep ts) override;
 	void OnMouseClick(const glm::vec2& coords);
+	void OnMouseMoved(float xOffset, float yOffset);
 
 	void EnableFollowCursorShape();
 	void DisableFollowCursorShape();
@@ -30,7 +31,9 @@ public:
 	void RemoveFromGroup() {}
 	void MergeGroups() {}
 	void Copy() {}
-	void Move() {}
+	void ResizeBrush(float x, float y, bool linked);
+	void Resize(float x, float y, bool linked);
+	void Move(float x, float y);
 	void Undo() {}
 	void Redo() {}
 	void Clear() {}
@@ -39,8 +42,12 @@ public:
 	void Deserialize() {}
 
 	glm::vec2 ToCameraSpace(const glm::vec2& coords);
+	Engine::Entity Raycast(const glm::vec2& coords);
+	void Select(Engine::Entity entity);
+	void DeselectAll();
 
 
+	 
 	Engine::Ref<CurrentState> GetCurrentState() { return m_State; }
 public:
 	static WorkspaceManager* Get() {
@@ -52,11 +59,10 @@ private:
 	inline static WorkspaceManager* s_Instance = nullptr; // Singleton instance
 
 private:
-	// групи реалізують патерн компонувальник
-	Engine::Entity m_RootGroup;
-	std::unordered_map<std::string, Engine::Ref<Engine::Texture2D>> m_Textures;
 
+	Engine::Entity m_RootGroup;
 	std::vector<Engine::Entity> m_SelectedEntities;
+	std::unordered_map<std::string, Engine::Ref<Engine::Texture2D>> m_Textures;
 
 	Engine::Ref<CurrentState> m_State = Engine::CreateRef<CurrentState>();
 

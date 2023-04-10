@@ -1,8 +1,9 @@
 #include "UIManager.h"
 #include <Engine/Scene/Components.h>
 #include <Engine/Core/Input.h>
-#include "Components/ButtonComponent.h"
+
 #include "Commands.h"
+#include "Utils.h"
 
 // Useable z range 10 - 11 
 void UIManager::OnCreate()
@@ -30,299 +31,229 @@ void UIManager::OnCreate()
 
 
 	m_PanelSize = 280.0f;
-	UIElementSpecification spec{ "UIPanel", {m_PanelSize, 720 }, { 0, 0, 10 }, {1.0, 1.0, 1.0, 1.0f} };
-	CreateUIElement(spec, m_Textures["UIPanel"]);
+	UIElementSpecification UIspec{ "UIPanel", {m_PanelSize, 720 }, { 0, 0, 10 } };
+	UIspec.RealTexture = m_Textures["UIPanel"];
+	CreateUIElement(UIspec);
 
-	spec.Name = "CursorButton";
-	spec.Size = { 40, 40 };
-	spec.Position = { 20, 20, 10.1 };
-	spec.Color = { 1.0, 1.0, 1.0, 1.0 };
-	Engine::Entity ent = CreateUIElement(spec, m_Textures["CursorButton"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectCursorModeCommand>(m_Workspace, m_State));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["CursorButton"];
-		bc.OnClickTexture = bc.RealTexture;
-		bc.ToggleGroup = ToggleGroups::Mode;
-	}
+	UIspec.Name = "CursorButton";
+	UIspec.Size = { 40, 40 };
+	UIspec.Position = { 20, 20, 10.1 };
+	UIspec.RealTexture = m_Textures["CursorButton"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	UIspec.ToggleGroup = ToggleGroups::Mode;
+
+	Engine::Entity ent = CreateUIElement(UIspec);
+	CreateButton<SelectCursorModeCommand>(ent, UIspec);
+
+	//Select Cursor as default mode
+	ent.GetComponent<Engine::SpriteRendererComponent>().Color = UIspec.OnClickColor;
+	SelectCursorModeCommand commandDefaultMode(m_Workspace);
+	commandDefaultMode.Execute();
+	
 
 
-	spec.Name = "RectangleButton";
-	spec.Position.x = 80;
-	ent = CreateUIElement(spec, m_Textures["RectangleButton"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectRectangleCommand>(m_Workspace, m_State));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["RectangleButton"];
-		bc.OnClickTexture = bc.RealTexture;
-		bc.ToggleGroup = ToggleGroups::Mode;
-	}
+	UIspec.Name = "RectangleButton";
+	UIspec.Position.x = 80;
+	UIspec.RealTexture = m_Textures["RectangleButton"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
 
-	spec.Name = "CircleButton";
-	spec.Position.x = 140;
-	ent = CreateUIElement(spec, m_Textures["CircleButton"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectCircleCommand>(m_Workspace, m_State));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["CircleButton"];
-		bc.OnClickTexture = bc.RealTexture;
-		bc.ToggleGroup = ToggleGroups::Mode;
-	}
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectRectangleCommand>(ent, UIspec);
 
-	spec.Name = "TriangleButton";
-	spec.Position.x = 200;
-	ent = CreateUIElement(spec, m_Textures["TriangleButton"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectTriangleCommand>(m_Workspace, m_State));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["TriangleButton"];
-		bc.OnClickTexture = bc.RealTexture;
-		bc.ToggleGroup = ToggleGroups::Mode;
-	}
 
-	spec.Name = "WhiteColor";
-	spec.Size = { 30, 30 };
-	spec.Position.x = 20;
-	spec.Position.y = 630;
-	spec.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
+	UIspec.Name = "CircleButton";
+	UIspec.Position.x = 140;
+	UIspec.RealTexture = m_Textures["CircleButton"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
 
-	}
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectCircleCommand>(ent, UIspec);
 
-	spec.Name = "BlackColor";
-	spec.Position.x = 70;
-	spec.Color = { 0.0f, 0.0f, 0.0f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
-	}
 
-	spec.Name = "RedColor";
-	spec.Position.x = 120;
-	spec.Color = { 0.85f, 0.15f, 0.15f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
-	}
+	UIspec.Name = "TriangleButton";
+	UIspec.Position.x = 200;
+	UIspec.RealTexture = m_Textures["TriangleButton"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
 
-	spec.Name = "GreenColor";
-	spec.Position.x = 170;
-	spec.Color = { 0.15f, 0.85f, 0.15f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
-	}
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectTriangleCommand>(ent, UIspec);
 
-	spec.Name = "BlueColor";
-	spec.Position.x = 220;
-	spec.Color = { 0.15f, 0.15f, 0.85f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
-	}
 
-	spec.Name = "LightGreyColor";
-	spec.Position.x = 20;
-	spec.Position.y = 680;
-	spec.Color = { 0.8f, 0.8f, 0.8f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
-	}
+	UIspec.Name = "WhiteColor";
+	UIspec.Size = { 30, 30 };
+	UIspec.Position.x = 20;
+	UIspec.Position.y = 630;
+	UIspec.RealTexture = m_Textures["RealColor"];
+	UIspec.OnClickTexture = m_Textures["OnClickColor"];
+	UIspec.ToggleGroup = ToggleGroups::Color;
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "DarkGreyColor";
-	spec.Position.x = 70;
-	spec.Color = { 0.4f, 0.4f, 0.4f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
-	}
 
-	spec.Name = "PurpleColor";
-	spec.Position.x = 120;
-	spec.Color = { 0.5f, 0.15f, 0.85f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
-	}
+	UIspec.Name = "BlackColor";
+	UIspec.Position.x = 70;
+	UIspec.RealColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "YellowColor";
-	spec.Position.x = 170;
-	spec.Color = { 0.85f, 0.85f, 0.15f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
-	}
 
-	spec.Name = "CyanColor";
-	spec.Position.x = 220;
-	spec.Color = { 0.15f, 0.85f, 0.85f, 1.0f };
-	ent = CreateUIElement(spec, m_Textures["RealColor"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<SelectColorCommand>(m_Workspace, m_State, spec.Color));
-		bc.OnClickTexture = m_Textures["OnClickColor"];
-		bc.RealTexture = m_Textures["RealColor"];
-		bc.RealColor = spec.Color;
-		bc.OnClickColor = bc.RealColor;
-		bc.ToggleGroup = ToggleGroups::Color;
-	}
+	UIspec.Name = "RedColor";
+	UIspec.Position.x = 120;
+	UIspec.RealColor = { 0.85f, 0.15f, 0.15f, 1.0f };
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "SizeX";
-	spec.Position.x = 60;
-	spec.Position.y = 80;
-	spec.Size = { 160, 40 };
-	spec.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-	CreateUIElement(spec, m_Textures["SizeX"]);
+	UIspec.Name = "GreenColor";
+	UIspec.Position.x = 170;
+	UIspec.RealColor = { 0.15f, 0.85f, 0.15f, 1.0f };
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "SizeY";
-	spec.Position.y = 140;
-	CreateUIElement(spec, m_Textures["SizeY"]);
+	UIspec.Name = "BlueColor";
+	UIspec.Position.x = 220;
+	UIspec.RealColor = { 0.15f, 0.15f, 0.85f, 1.0f };
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "XarrowLeft";
-	spec.Position.x = 20;
-	spec.Position.y = 85;
-	spec.Size = { 30, 30 };
-	ent = CreateUIElement(spec, m_Textures["ArrowLeft"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<ChangeXsizeCommand>(m_Workspace, m_State, -3));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["ArrowLeft"];
-		bc.OnClickTexture = bc.RealTexture;
-	}
+	UIspec.Name = "LightGreyColor";
+	UIspec.Position.x = 20;
+	UIspec.Position.y = 680;
+	UIspec.RealColor = { 0.8f, 0.8f, 0.8f, 1.0f };
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "XarrowRight";
-	spec.Position.x = 230;
-	ent = CreateUIElement(spec, m_Textures["ArrowRight"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<ChangeXsizeCommand>(m_Workspace, m_State, 3));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["ArrowRight"];
-		bc.OnClickTexture = bc.RealTexture;
-	}
 
-	spec.Name = "YarrowLeft";
-	spec.Position.x = 20;
-	spec.Position.y = 145;
-	ent = CreateUIElement(spec, m_Textures["ArrowLeft"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<ChangeYsizeCommand>(m_Workspace, m_State, -3));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["ArrowLeft"];
-		bc.OnClickTexture = bc.RealTexture;
-	}
+	UIspec.Name = "DarkGreyColor";
+	UIspec.Position.x = 70;
+	UIspec.RealColor = { 0.4f, 0.4f, 0.4f, 1.0f };
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "YarrowRight";
-	spec.Position.x = 230;
-	spec.Position.y = 145;
-	ent = CreateUIElement(spec, m_Textures["ArrowRight"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<ChangeYsizeCommand>(m_Workspace, m_State, 3));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["ArrowRight"];
-		bc.OnClickTexture = bc.RealTexture;
-	}
+	//Select Dark grey color as default
+	ent.GetComponent<Engine::SpriteRendererComponent>().Texture = UIspec.OnClickTexture;
+	SelectColorCommand commandDefaultColor(m_Workspace, UIspec.RealColor);
+	commandDefaultColor.Execute();
 
-	spec.Name = "GroupButton";
-	spec.Position.x = 15;
-	spec.Position.y = 460;
-	spec.Size = { 120, 30 };
-	ent = CreateUIElement(spec, m_Textures["GroupButton"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<GroupCommand>(m_Workspace, m_State));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["GroupButton"];
-		bc.OnClickTexture = bc.RealTexture;
-	}
+	UIspec.Name = "PurpleColor";
+	UIspec.Position.x = 120;
+	UIspec.RealColor = { 0.5f, 0.15f, 0.85f, 1.0f };
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "UngroupButton";
-	spec.Position.x = 145;
-	ent = CreateUIElement(spec, m_Textures["UngroupButton"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<UngroupCommand>(m_Workspace, m_State));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["UngroupButton"];
-		bc.OnClickTexture = bc.RealTexture;
-	}
+	UIspec.Name = "YellowColor";
+	UIspec.Position.x = 170;
+	UIspec.RealColor = { 0.85f, 0.85f, 0.15f, 1.0f };
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "AddToGroupButton";
-	spec.Position.x = 15;
-	spec.Position.y += 50;
-	ent = CreateUIElement(spec, m_Textures["AddToGroupButton"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<AddToGroupCommand>(m_Workspace, m_State));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["AddToGroupButton"];
-		bc.OnClickTexture = bc.RealTexture;
-	}
+	UIspec.Name = "CyanColor";
+	UIspec.Position.x = 220;
+	UIspec.RealColor = { 0.15f, 0.85f, 0.85f, 1.0f };
+	UIspec.OnClickColor = UIspec.RealColor;
+	ent = CreateUIElement(UIspec);
+	CreateButton<SelectColorCommand>(ent, UIspec, UIspec.RealColor);
 
-	spec.Name = "RemoveFromGroupButton";
-	spec.Position.x = 145;
-	ent = CreateUIElement(spec, m_Textures["RemoveFromGroupButton"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<RemoveFromGroupCommand>(m_Workspace, m_State));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["RemoveFromGroupButton"];
-		bc.OnClickTexture = bc.RealTexture;
-	}
+	UIspec.Name = "SizeX";
+	UIspec.Position.x = 60;
+	UIspec.Position.y = 80;
+	UIspec.Size = { 160, 40 };
+	UIspec.RealColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	UIspec.RealTexture = m_Textures["SizeX"];
+	CreateUIElement(UIspec);
 
-	spec.Name = "MergeGroupsButton";
-	spec.Position.x = 15;
-	spec.Position.y += 50;
-	ent = CreateUIElement(spec, m_Textures["MergeGroupsButton"]);
-	{
-		auto& bc = ent.AddComponent<ButtonComponent>(Engine::CreateRef<MergeGroupsCommand>(m_Workspace, m_State));
-		bc.RealColor = spec.Color;
-		bc.RealTexture = m_Textures["MergeGroupsButton"];
-		bc.OnClickTexture = bc.RealTexture;
-	}
 
+	UIspec.Name = "SizeY";
+	UIspec.Position.y = 140;
+	UIspec.RealTexture = m_Textures["SizeY"];
+	CreateUIElement(UIspec);
+
+	UIspec.Name = "XarrowLeft";
+	UIspec.Position.x = 20;
+	UIspec.Position.y = 85;
+	UIspec.Size = { 30, 30 };
+	UIspec.OnClickColor = { 0.61f, 0.57f, 0.37f, 1.0f };
+	UIspec.RealTexture = m_Textures["ArrowLeft"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	UIspec.ToggleGroup = ToggleGroups::None;
+	ent = CreateUIElement(UIspec);
+	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, -3, 0, false);
+
+	UIspec.Name = "XarrowRight";
+	UIspec.Position.x = 230;
+	UIspec.RealTexture = m_Textures["ArrowRight"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	ent = CreateUIElement(UIspec);
+	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, 3, 0, false);
+
+
+	UIspec.Name = "YarrowLeft";
+	UIspec.Position.x = 20;
+	UIspec.Position.y = 145;
+	UIspec.RealTexture = m_Textures["ArrowLeft"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	ent = CreateUIElement(UIspec);
+	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, 0, -3, false);
+
+
+	UIspec.Name = "YarrowRight";
+	UIspec.Position.x = 230;
+	UIspec.Position.y = 145;
+	UIspec.RealTexture = m_Textures["ArrowRight"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	ent = CreateUIElement(UIspec);
+	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, 0, 3, false);
+
+
+	UIspec.Name = "GroupButton";
+	UIspec.Position.x = 15;
+	UIspec.Position.y = 460;
+	UIspec.Size = { 120, 30 };
+	UIspec.RealTexture = m_Textures["GroupButton"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	ent = CreateUIElement(UIspec);
+	CreateButton<GroupCommand>(ent, UIspec);
+
+	UIspec.Name = "UngroupButton";
+	UIspec.Position.x = 145;
+	UIspec.RealTexture = m_Textures["UngroupButton"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	ent = CreateUIElement(UIspec);
+	CreateButton<UngroupCommand>(ent, UIspec);
+
+
+	UIspec.Name = "AddToGroupButton";
+	UIspec.Position.x = 15;
+	UIspec.Position.y += 50;
+	UIspec.RealTexture = m_Textures["AddToGroupButton"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	ent = CreateUIElement(UIspec);
+	CreateButton<AddToGroupCommand>(ent, UIspec);
+
+
+	UIspec.Name = "RemoveFromGroupButton";
+	UIspec.Position.x = 145;
+	UIspec.RealTexture = m_Textures["RemoveFromGroupButton"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	ent = CreateUIElement(UIspec);
+	CreateButton<RemoveFromGroupCommand>(ent, UIspec);
+
+
+	UIspec.Name = "MergeGroupsButton";
+	UIspec.Position.x = 15;
+	UIspec.Position.y += 50;
+	UIspec.RealTexture = m_Textures["MergeGroupsButton"];
+	UIspec.OnClickTexture = UIspec.RealTexture;
+	ent = CreateUIElement(UIspec);
+	CreateButton<MergeGroupsCommand>(ent, UIspec);
 
 }
 
@@ -334,7 +265,7 @@ void UIManager::OnMouseClick(const glm::vec2& coords)
 			continue;
 
 		auto& transform = entity.GetComponent<Engine::TransformComponent>();
-		bool result = CheckCollision(transform , coords);
+		bool result = Utils::CheckCollision(transform , coords);
 
 		if (!result)
 			continue;
@@ -400,50 +331,123 @@ void UIManager::OnMouseReleased()
 	}
 }
 
+
 void UIManager::OnKeyPressed(Engine::KeyCode key)
 {
-	int32_t value = 1;
+	// TODO: make constants
+	float value = 1;
+	float link = 0;
+
 	bool shiftPressed = Engine::Input::IsKeyPressed(Engine::Key::LeftShift) || Engine::Input::IsKeyPressed(Engine::Key::RightShift);
-	if (shiftPressed) value = 5;
-	switch (key)
-	{
+	bool altPressed = Engine::Input::IsKeyPressed(Engine::Key::LeftAlt) || Engine::Input::IsKeyPressed(Engine::Key::RightAlt);
+	bool ctrlPressed = Engine::Input::IsKeyPressed(Engine::Key::LeftControl) || Engine::Input::IsKeyPressed(Engine::Key::RightControl);
+
+	if (shiftPressed) 
+		value = 5;
+	if (ctrlPressed)
+		link = true;
+
+	if (m_State->m_Action == ActionType::Draw)
+		switch (key)
+		{
 		case Engine::Key::Left:
 		{
-			ChangeXsizeCommand command(m_Workspace, m_State, -value);
+
+			ChangeBrushSizeCommand command(m_Workspace, -value, 0, link);
 			command.Execute();
 			break;
 		}
 		case Engine::Key::Right:
 		{
-			ChangeXsizeCommand command(m_Workspace, m_State, value);
+			ChangeBrushSizeCommand command(m_Workspace, value, 0, link);
 			command.Execute();
 			break;
 		}
 		case Engine::Key::Down:
 		{
-			ChangeYsizeCommand command(m_Workspace, m_State, -value);
+			ChangeBrushSizeCommand command(m_Workspace, 0, -value, link);
 			command.Execute();
 			break;
 		}
 		case Engine::Key::Up:
 		{
-			ChangeYsizeCommand command(m_Workspace, m_State, value);
+			ChangeBrushSizeCommand command(m_Workspace, 0, value, link);
 			command.Execute();
 			break;
 		}
 
+		}
+	else
+		if (altPressed)
+			switch (key)
+			{
+			case Engine::Key::Left:
+			{
 
-	}
+				ChangeSelectedSizeCommand command(m_Workspace, -value, 0, link);
+				command.Execute();
+				break;
+			}
+			case Engine::Key::Right:
+			{
+				ChangeSelectedSizeCommand command(m_Workspace, value, 0, link);
+				command.Execute();
+				break;
+			}
+			case Engine::Key::Down:
+			{
+				ChangeSelectedSizeCommand command(m_Workspace, 0, -value, link);
+				command.Execute();
+				break;
+			}
+			case Engine::Key::Up:
+			{
+				ChangeSelectedSizeCommand command(m_Workspace, 0, value, link);
+				command.Execute();
+				break;
+			}
+
+			}
+		else
+			switch (key)
+			{
+			case Engine::Key::Left:
+			{
+
+				ChangeSelectedPositionCommand command(m_Workspace, -value, 0);
+				command.Execute();
+				break;
+			}
+			case Engine::Key::Right:
+			{
+				ChangeSelectedPositionCommand command(m_Workspace, value, 0);
+				command.Execute();
+				break;
+			}
+			case Engine::Key::Down:
+			{
+				ChangeSelectedPositionCommand command(m_Workspace, 0, -value);
+				command.Execute();
+				break;
+			}
+			case Engine::Key::Up:
+			{
+				ChangeSelectedPositionCommand command(m_Workspace, 0,  value);
+				command.Execute();
+				break;
+			}
+
+			}
 }
 
-Engine::Entity UIManager::CreateUIElement(const UIElementSpecification& spec, Engine::Ref<Engine::Texture2D> texture)
+Engine::Entity UIManager::CreateUIElement(const UIElementSpecification& spec)
 {
 	auto button = m_Entity.GetScene()->CreateEntity(spec.Name);
-	button.AddComponent<Engine::SpriteRendererComponent>(spec.Color);
+	button.AddComponent<Engine::SpriteRendererComponent>(spec.RealColor);
 	Engine::TransformComponent& tc = button.GetComponent<Engine::TransformComponent>();
 	button.AddComponent<Engine::UIComponent>();
-	if (texture)
-		button.GetComponent<Engine::SpriteRendererComponent>().Texture = texture;
+	if (spec.RealTexture)
+		button.GetComponent<Engine::SpriteRendererComponent>().Texture = spec.RealTexture;
 
 
 	tc.Scale.x = spec.Size.x;
@@ -456,19 +460,16 @@ Engine::Entity UIManager::CreateUIElement(const UIElementSpecification& spec, En
 	return button;
 }
 
-void UIManager::SetButtonAction(Engine::Entity entity)
+template<typename T, typename... Args>
+void UIManager::CreateButton(Engine::Entity entity, const UIElementSpecification& spec, Args&&... args)
 {
-
-}
-
-bool UIManager::CheckCollision(const Engine::TransformComponent& transform, const glm::vec2& coords)
-{
-	bool left = (transform.Translation.x - (transform.Scale.x / 2.0f)) < coords.x;
-	bool right = (transform.Translation.x + (transform.Scale.x / 2.0f)) > coords.x;
-	bool bottom = (transform.Translation.y - (transform.Scale.y / 2.0f) )> coords.y;
-	bool top = (transform.Translation.y + (transform.Scale.y / 2.0f)) < coords.y;
-	bool result = left && right && top && bottom;
-
-	return result;
+	{
+		auto& bc = entity.AddComponent<ButtonComponent>(Engine::CreateRef<T>(m_Workspace, std::forward<Args>(args)...));
+		bc.RealColor = spec.RealColor;
+		bc.OnClickColor = spec.OnClickColor;
+		bc.RealTexture = spec.RealTexture;
+		bc.OnClickTexture = spec.OnClickTexture;
+		bc.ToggleGroup = spec.ToggleGroup;
+	}
 }
 

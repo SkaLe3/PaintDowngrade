@@ -14,6 +14,12 @@ namespace Engine {
 			m_EntityHandle = other.m_EntityHandle;
 			m_Scene = other.m_Scene;
 		}
+		Entity operator=(const Entity& other)
+		{
+			m_EntityHandle = other.m_EntityHandle;
+			m_Scene = other.m_Scene;
+			return *this;
+		}
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)

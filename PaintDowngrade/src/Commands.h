@@ -7,7 +7,10 @@
 class Command
 {
 public:
-	Command(WorkspaceManager* workspace, Engine::Ref<CurrentState> state) :m_Workspace(workspace), m_State(state) {}
+	Command(WorkspaceManager* workspace) :m_Workspace(workspace)
+	{
+		m_State = m_Workspace->GetCurrentState();
+	}
 	virtual void Execute() = 0;
 
 protected:
@@ -18,7 +21,7 @@ protected:
 class SelectCursorModeCommand : public Command
 {
 public:
-	SelectCursorModeCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state) : Command(workspace, state) {}
+	SelectCursorModeCommand(WorkspaceManager* workspace) : Command(workspace) {}
 	virtual void Execute()
 	{
 		if (m_State->m_Action != ActionType::Cursor)
@@ -33,7 +36,7 @@ public:
 class SelectDrawModeCommand : public Command
 {
 public:
-	SelectDrawModeCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state) : Command(workspace, state) {}
+	SelectDrawModeCommand(WorkspaceManager* workspace) : Command(workspace) {}
 	virtual void Execute()
 	{
 		m_Workspace->EnableFollowCursorShape();
@@ -47,7 +50,7 @@ public:
 class SelectRectangleCommand : public Command
 {
 public:
-	SelectRectangleCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state) : Command(workspace, state) {}
+	SelectRectangleCommand(WorkspaceManager* workspace) : Command(workspace) {}
 	virtual void Execute()
 	{
 		m_State->m_Shape = ShapeType::Rectangle;
@@ -62,7 +65,7 @@ public:
 class SelectCircleCommand : public Command
 {
 public:
-	SelectCircleCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state) : Command(workspace, state) {}
+	SelectCircleCommand(WorkspaceManager* workspace) : Command(workspace) {}
 	virtual void Execute()
 	{
 		m_State->m_Shape = ShapeType::Circle;
@@ -77,7 +80,7 @@ public:
 class SelectTriangleCommand : public Command
 {
 public:
-	SelectTriangleCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state) : Command(workspace, state) {}
+	SelectTriangleCommand(WorkspaceManager* workspace) : Command(workspace) {}
 	virtual void Execute()
 	{
 		m_State->m_Shape = ShapeType::Triangle;
@@ -92,8 +95,8 @@ public:
 class SelectColorCommand : public Command
 {
 public:
-	SelectColorCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state, const glm::vec4& color) 
-		: Command(workspace, state), m_Color(color) {}
+	SelectColorCommand(WorkspaceManager* workspace, const glm::vec4& color) 
+		: Command(workspace), m_Color(color) {}
 
 	virtual void Execute()
 	{
@@ -104,43 +107,60 @@ private:
 };
 
 
-class ChangeXsizeCommand : public Command
+class ChangeBrushSizeCommand : public Command
 {
 public:
-	ChangeXsizeCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state, float factor)
-		: Command(workspace, state), m_Factor(factor) {}
+	ChangeBrushSizeCommand(WorkspaceManager* workspace, float x, float y, bool linked)
+		: Command(workspace), m_X(x), m_Y(y), m_Linked(linked) {}
 
 	virtual void Execute()
 	{
-		m_State->Size.x += m_Factor;
-		m_State->Size.x = glm::clamp(m_State->Size.x, 1.0f, 300.0f);
+		m_Workspace->ResizeBrush(m_X, m_Y, m_Linked);
 	}
 private:
-	float m_Factor;
+	float m_X;
+	float m_Y;
+	bool m_Linked;
 };
 
-class ChangeYsizeCommand : public Command
+
+class ChangeSelectedSizeCommand : public Command
 {
 public:
-	ChangeYsizeCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state, float factor)
-		: Command(workspace, state), m_Factor(factor) {}
+	ChangeSelectedSizeCommand(WorkspaceManager* workspace, float x, float y, bool linked)
+		: Command(workspace), m_X(x), m_Y(y), m_Linked(linked) {}
 
 	virtual void Execute()
 	{
-		m_State->Size.y += m_Factor;
-		m_State->Size.y = glm::clamp(m_State->Size.y, 1.0f, 300.0f);
+		m_Workspace->Resize(m_X, m_Y, m_Linked);
 	}
 private:
-	float m_Factor;
+	float m_X;
+	float m_Y;
+	bool m_Linked;
 };
 
+class ChangeSelectedPositionCommand : public Command
+{
+public:
+	ChangeSelectedPositionCommand(WorkspaceManager* workspace, float x, float y)
+		: Command(workspace), m_X(x), m_Y(y) {}
+
+	virtual void Execute()
+	{
+		m_Workspace->Move(m_X, m_Y);
+	}
+private:
+	float m_X;
+	float m_Y;
+};
 
 
 class GroupCommand : public Command
 {
 public:
-	GroupCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
-		: Command(workspace, state) {}
+	GroupCommand(WorkspaceManager* workspace)
+		: Command(workspace) {}
 
 	virtual void Execute()
 	{
@@ -152,8 +172,8 @@ public:
 class UngroupCommand : public Command
 {
 public:
-	UngroupCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
-		: Command(workspace, state) {}
+	UngroupCommand(WorkspaceManager* workspace)
+		: Command(workspace) {}
 
 	virtual void Execute()
 	{
@@ -165,8 +185,8 @@ public:
 class AddToGroupCommand : public Command
 {
 public:
-	AddToGroupCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
-		: Command(workspace, state) {}
+	AddToGroupCommand(WorkspaceManager* workspace)
+		: Command(workspace) {}
 
 	virtual void Execute()
 	{
@@ -178,8 +198,8 @@ public:
 class RemoveFromGroupCommand : public Command
 {
 public:
-	RemoveFromGroupCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
-		: Command(workspace, state) {}
+	RemoveFromGroupCommand(WorkspaceManager* workspace)
+		: Command(workspace) {}
 
 	virtual void Execute()
 	{
@@ -191,8 +211,8 @@ public:
 class MergeGroupsCommand : public Command
 {
 public:
-	MergeGroupsCommand(WorkspaceManager* workspace, Engine::Ref<CurrentState> state)
-		: Command(workspace, state) {}
+	MergeGroupsCommand(WorkspaceManager* workspace)
+		: Command(workspace) {}
 
 	virtual void Execute()
 	{

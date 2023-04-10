@@ -39,6 +39,7 @@ void AppLayer::OnEvent(Engine::Event& e)
 	dispatcher.Dispatch<Engine::MouseScrolledEvent>(BIND_EVENT_FN(AppLayer::OnMouseScroll));
 	dispatcher.Dispatch<Engine::MouseButtonPressedEvent>(BIND_EVENT_FN(AppLayer::OnMouseButtonPressed));
 	dispatcher.Dispatch<Engine::MouseButtonReleasedEvent>(BIND_EVENT_FN(AppLayer::OnMouseButtonReleased));
+	dispatcher.Dispatch<Engine::MouseMovedEvent>(BIND_EVENT_FN(AppLayer::OnMouseMoved));
 
 	dispatcher.Dispatch<Engine::WindowResizeEvent>(BIND_EVENT_FN(AppLayer::OnWindowResize));
 
@@ -46,18 +47,26 @@ void AppLayer::OnEvent(Engine::Event& e)
 
 bool AppLayer::OnMouseScroll(Engine::MouseScrolledEvent& e)
 {
-	float delta = e.GetYOffset() * 10;
 
-	float value = m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.GetOrthographicSize();
+	if (Engine::Input::IsKeyPressed(Engine::Key::LeftAlt))
+	{
 
-	m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographicSize(glm::clamp(value + delta, 30.0f, 500.0f));
-	static_cast<CameraController*>(m_WorkspaceCamera.GetComponent<Engine::NativeScriptComponent>().Instance)->SetCameraZoomLevel(value + delta);
-	return true;
+		float delta = - e.GetYOffset() * 10;
+
+		float value = m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.GetOrthographicSize();
+
+		m_WorkspaceCamera.GetComponent<Engine::CameraComponent>().Camera.SetOrthographicSize(glm::clamp(value + delta, 30.0f, 500.0f));
+		static_cast<CameraController*>(m_WorkspaceCamera.GetComponent<Engine::NativeScriptComponent>().Instance)->SetCameraZoomLevel(value + delta);
+		return true;
+	}
+
+	static_cast<CameraController*>(m_WorkspaceCamera.GetComponent<Engine::NativeScriptComponent>().Instance)->Move(e.GetXOffset() * 0.05f, e.GetYOffset()* 0.05f);
+	
 }
 
 bool AppLayer::OnKeyPressed(Engine::KeyPressedEvent& e)
 {
-	UIManager* UI = (UIManager*)m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
+	UIManager* UI = static_cast<UIManager*>(m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 	UI->OnKeyPressed(e.GetKeyCode());
 	return true;
 }
@@ -65,8 +74,9 @@ bool AppLayer::OnKeyPressed(Engine::KeyPressedEvent& e)
 bool AppLayer::OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e)
 {
 	glm::vec2 ViewportSize = m_ActiveScene->GetViewportSize();
-	UIManager* UI = (UIManager*)m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
-	WorkspaceManager* Workspace = (WorkspaceManager*)m_WorkspaceEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
+
+	UIManager* UI = static_cast<UIManager*>(m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+	WorkspaceManager * Workspace = static_cast<WorkspaceManager*>(m_WorkspaceEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 	float xSize = UI->GetXSize();
 	float aspectRatio = ViewportSize.x / ViewportSize.y;
 	bool clickOnUI = Engine::Input::GetMouseX() / ViewportSize.x <= xSize / (720.0f * aspectRatio);
@@ -88,8 +98,28 @@ bool AppLayer::OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e)
 
 bool AppLayer::OnMouseButtonReleased(Engine::MouseButtonReleasedEvent& e)
 {
-	UIManager* UI = (UIManager*)m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance;
+	UIManager* UI = static_cast<UIManager*>(m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 	UI->OnMouseReleased();
+	return true;
+}
+
+bool AppLayer::OnMouseMoved(Engine::MouseMovedEvent& e)
+{
+	static float x = e.GetX();
+	static float y = e.GetY();
+	//TODO: Optimize this
+	bool spacePressed = Engine::Input::IsKeyPressed(Engine::Key::Space);
+	bool mousePressed = Engine::Input::IsMouseButtonPressed(Engine::Mouse::Button0);
+	if (spacePressed && mousePressed)
+	{
+
+		CameraController* controller = static_cast<CameraController*>(m_WorkspaceCamera.GetComponent<Engine::NativeScriptComponent>().Instance);
+		const glm::vec2& size = m_WorkspaceCamera.GetScene()->GetViewportSize();
+		controller->Move((x - e.GetX())/size.x, (y - e.GetY())/size.y);
+
+	}
+	x = e.GetX();
+	y = e.GetY();
 	return true;
 }
 
@@ -125,8 +155,8 @@ void AppLayer::LoadScene()
 	// Gives UIManager ref on current state of editor
 	// Think about better solution
 	// Need to be set before OnCreate()
-	((UIManager*)nsc1.Instance)->BindWorkspace(((WorkspaceManager*)nsc2.Instance));
-	((UIManager*)nsc1.Instance)->SetCurrentState(((WorkspaceManager*)nsc2.Instance)->GetCurrentState());
+	static_cast<UIManager*>(nsc1.Instance)->BindWorkspace(static_cast<WorkspaceManager*>(nsc2.Instance));
+	static_cast<UIManager*>(nsc1.Instance)->SetCurrentState(static_cast<WorkspaceManager*>(nsc2.Instance)->GetCurrentState());
 	nsc1.Instance->OnCreate();
 
 
