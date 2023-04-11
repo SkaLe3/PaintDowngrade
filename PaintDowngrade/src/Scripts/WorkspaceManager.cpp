@@ -194,6 +194,8 @@ void WorkspaceManager::Select(Engine::Entity entity)
 
 			m_SelectedEntities.erase(it);
 			src.Texture = sc.DefaultTexture;
+			src.Color.w = { 1.0f };
+			src.Color -= 0.15f;
 			return;
 		}
 		it++;
@@ -207,6 +209,8 @@ void WorkspaceManager::Select(Engine::Entity entity)
 
 	m_SelectedEntities.emplace_back(entity);
 	src.Texture = sc.SelectionTexture;
+	src.Color.w = { 0.8f };
+	src.Color += 0.15f;
 }
 
 void WorkspaceManager::DeselectAll()
@@ -216,6 +220,8 @@ void WorkspaceManager::DeselectAll()
 		auto& src = entity.GetComponent<Engine::SpriteRendererComponent>();
 		auto& sc = entity.GetComponent<ShapeComponent>();
 		src.Texture = sc.DefaultTexture;
+		src.Color.w = { 1.0f };
+		src.Color -= 0.15f;
 	}
 }
 
