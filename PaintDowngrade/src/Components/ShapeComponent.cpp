@@ -22,7 +22,7 @@ bool ShapeComponent::IsHit(const glm::vec2& coords, Engine::Ref<Engine::Entity> 
 
 	if (Type == ShapeType::Group)
 	{ 
-		std::vector<Engine::Entity>& entities = static_cast<GroupScript*>(m_Entity.GetComponent<Engine::NativeScriptComponent>().Instance)->GetEntities();
+		EntityContainer& entities = static_cast<GroupScript*>(m_Entity.GetComponent<Engine::NativeScriptComponent>().Instance)->GetEntities();
 		for (Engine::Entity entity : entities)
 			flag |= entity.GetComponent<ShapeComponent>().IsHit(coords, emptyEntity);
 	}

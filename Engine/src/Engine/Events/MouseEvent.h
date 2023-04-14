@@ -8,10 +8,10 @@ namespace Engine {
 	class MouseMovedEvent : public Event
 	{
 	public:
-		MouseMovedEvent(double x, double y) : m_MouseX(x), m_MouseY(y) {}
+		MouseMovedEvent(float x, float y) : m_MouseX(x), m_MouseY(y) {}
 		
-		double GetX() const { return m_MouseX; }
-		double GetY() const { return m_MouseY; }
+		float GetX() const { return m_MouseX; }
+		float GetY() const { return m_MouseY; }
 
 		static EventType GetStaticType() { return EventType::MouseMoved; }
 		virtual EventType GetEventType() const override { return GetStaticType(); }
@@ -23,7 +23,7 @@ namespace Engine {
 			return ss.str();
 		}
 	private: 
-		double m_MouseX, m_MouseY;
+		float m_MouseX, m_MouseY;
 	};
 
 	class MouseScrolledEvent : public Event

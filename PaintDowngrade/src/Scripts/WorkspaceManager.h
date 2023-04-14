@@ -3,7 +3,7 @@
 #include <Engine/Renderer/Texture.h>
 #include "Components/ShapeComponent.h"
 #include "SettingsState.h"
-
+#include "EntityContainer.h"
 
 
 class WorkspaceManager final :public Engine::ScriptableEntity
@@ -15,7 +15,8 @@ public:
 	virtual void OnCreate() override;
 	virtual void OnUpdate(Engine::Timestep ts) override;
 	void OnMouseClick(const glm::vec2& coords);
-	void OnMouseMoved(float xOffset, float yOffset);
+	void OnMouseReleased(const glm::vec2& coords);
+	void OnMouseMoved(const glm::vec2& oldCoords, const glm::vec2& newCoords, Engine::Entity camera);
 
 	void EnableFollowCursorShape();
 	void DisableFollowCursorShape();
@@ -44,6 +45,7 @@ public:
 	glm::vec2 ToCameraSpace(const glm::vec2& coords);
 	Engine::Entity Raycast(const glm::vec2& coords);
 	void Select(Engine::Entity entity);
+	void Deselect(Engine::Entity entity);
 	void DeselectAll();
 
 
@@ -61,7 +63,7 @@ private:
 private:
 
 	Engine::Entity m_RootGroup;
-	std::vector<Engine::Entity> m_SelectedEntities;
+	EntityContainer m_SelectedEntities;
 	std::unordered_map<std::string, Engine::Ref<Engine::Texture2D>> m_Textures;
 
 	Engine::Ref<CurrentState> m_State = Engine::CreateRef<CurrentState>();

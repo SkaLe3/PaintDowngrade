@@ -22,6 +22,8 @@ public:
 	void LoadScene();
 
 	glm::vec2 ToCameraSpace(Engine::Entity cameraEntity, const glm::vec2& coords);
+	glm::vec2 ToRenderSpace(const glm::vec2& coords, const glm::vec2& ViewportSize);
+	bool IsOnUI(float UISize, float mouseX, const glm::vec2& ViewportSize);
 	void RecalculateUICamera(const glm::vec2& viewport);
 
 

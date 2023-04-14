@@ -1,5 +1,6 @@
 #pragma once
 #include <Engine/Scene/ScriptableEntity.h>
+#include "EntityContainer.h"
 
 class GroupScript final : public Engine::ScriptableEntity
 {
@@ -12,11 +13,11 @@ public:
 	void Push(Engine::Entity entity);
 
 
-	std::vector<Engine::Entity>& GetEntities() { return m_Entities; }
+	EntityContainer& GetEntities() { return m_Entities; }
 
 
 private:
 	uint32_t m_LayerIndex = 0;
-	std::vector<Engine::Entity> m_Entities;
+	EntityContainer m_Entities;
 
 };

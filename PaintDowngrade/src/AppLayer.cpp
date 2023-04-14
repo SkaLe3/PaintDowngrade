@@ -77,20 +77,20 @@ bool AppLayer::OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e)
 
 	UIManager* UI = static_cast<UIManager*>(m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 	WorkspaceManager * Workspace = static_cast<WorkspaceManager*>(m_WorkspaceEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
-	float xSize = UI->GetXSize();
-	float aspectRatio = ViewportSize.x / ViewportSize.y;
-	bool clickOnUI = Engine::Input::GetMouseX() / ViewportSize.x <= xSize / (720.0f * aspectRatio);
-	glm::vec2 clickCoords = Engine::Input::GetMousePosition();
-	glm::vec2 inRenderCoords = { clickCoords.x / ViewportSize.x * 2 - 1, clickCoords.y / ViewportSize.y * 2 - 1 };
+
+	glm::vec2 mouseCoords = Engine::Input::GetMousePosition();
+	bool clickOnUI = IsOnUI(UI->GetXSize(), mouseCoords.x, ViewportSize);
+	glm::vec2 mouseInRenderCoords = ToRenderSpace(mouseCoords, ViewportSize);
+
 	if (clickOnUI)
 	{
 		EG_TRACE("Click on UI");
-		UI->OnMouseClick(ToCameraSpace(m_UICamera, inRenderCoords));
+		UI->OnMouseClick(ToCameraSpace(m_UICamera, mouseInRenderCoords));
 	}
 	else
 	{
 		EG_TRACE("Click on Workspace");
-		Workspace->OnMouseClick(ToCameraSpace(m_WorkspaceCamera, inRenderCoords));
+		Workspace->OnMouseClick(ToCameraSpace(m_WorkspaceCamera, mouseInRenderCoords));
 
 	}
 	return true;
@@ -98,26 +98,58 @@ bool AppLayer::OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e)
 
 bool AppLayer::OnMouseButtonReleased(Engine::MouseButtonReleasedEvent& e)
 {
+	glm::vec2 ViewportSize = m_ActiveScene->GetViewportSize();
+
 	UIManager* UI = static_cast<UIManager*>(m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
-	UI->OnMouseReleased();
+	WorkspaceManager* Workspace = static_cast<WorkspaceManager*>(m_WorkspaceEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+
+	glm::vec2 mouseCoords = Engine::Input::GetMousePosition();
+	bool clickOnUI = IsOnUI(UI->GetXSize(), mouseCoords.x, ViewportSize);
+	glm::vec2 mouseInRenderCoords = ToRenderSpace(mouseCoords, ViewportSize);
+
+	if (clickOnUI)
+	{
+		UI->OnMouseReleased();
+	}
+	else
+	{
+		Workspace->OnMouseReleased(ToCameraSpace(m_WorkspaceCamera, mouseInRenderCoords));
+
+	}
 	return true;
 }
 
+// Optimize
 bool AppLayer::OnMouseMoved(Engine::MouseMovedEvent& e)
 {
 	static float x = e.GetX();
 	static float y = e.GetY();
-	//TODO: Optimize this
-	bool spacePressed = Engine::Input::IsKeyPressed(Engine::Key::Space);
-	bool mousePressed = Engine::Input::IsMouseButtonPressed(Engine::Mouse::Button0);
-	if (spacePressed && mousePressed)
-	{
 
-		CameraController* controller = static_cast<CameraController*>(m_WorkspaceCamera.GetComponent<Engine::NativeScriptComponent>().Instance);
-		const glm::vec2& size = m_WorkspaceCamera.GetScene()->GetViewportSize();
-		controller->Move((x - e.GetX())/size.x, (y - e.GetY())/size.y);
+	glm::vec2 ViewportSize = m_ActiveScene->GetViewportSize();
+
+	UIManager* UI = static_cast<UIManager*>(m_UIPanelEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+	WorkspaceManager* workspace = static_cast<WorkspaceManager*>(m_WorkspaceEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+
+	//bool onUI = IsOnUI(UI->GetXSize(), e.GetX(), ViewportSize);
+	glm::vec2 mouseInRenderCoords = ToRenderSpace(glm::vec2{e.GetX(), e.GetY()}, ViewportSize);
+	glm::vec2 mouseInRenderCoordsPrev = ToRenderSpace(glm::vec2{ x, y }, ViewportSize);
+
+	if (workspace->GetCurrentState()->m_Action == ActionType::Cursor)
+	{
+		bool spacePressed = Engine::Input::IsKeyPressed(Engine::Key::Space);
+		bool mousePressed = Engine::Input::IsMouseButtonPressed(Engine::Mouse::Button0);
+		if (spacePressed && mousePressed)
+		{
+			CameraController* controller = static_cast<CameraController*>(m_WorkspaceCamera.GetComponent<Engine::NativeScriptComponent>().Instance);
+			controller->Move(x-e.GetX() / ViewportSize.y, y-e.GetY() / ViewportSize.y);
+		}
 
 	}
+
+	workspace->OnMouseMoved(ToCameraSpace(m_WorkspaceCamera, mouseInRenderCoordsPrev), ToCameraSpace(m_WorkspaceCamera, mouseInRenderCoords), m_WorkspaceCamera);
+
 	x = e.GetX();
 	y = e.GetY();
 	return true;
@@ -184,6 +216,17 @@ glm::vec2 AppLayer::ToCameraSpace(Engine::Entity cameraEntity, const glm::vec2& 
 	//EG_TRACE("Click coordinates X: ", result.x, "         Y: ", result.y);
 
 	return glm::vec2{ result.x, result.y };
+}
+
+glm::vec2 AppLayer::ToRenderSpace(const glm::vec2& coords, const glm::vec2& ViewportSize)
+{
+	return { coords.x / ViewportSize.x * 2 - 1, coords.y / ViewportSize.y * 2 - 1 };
+}
+
+bool AppLayer::IsOnUI(float UISize, float mouseX, const glm::vec2& ViewportSize)
+{
+	float aspectRatio = ViewportSize.x / ViewportSize.y;
+	return mouseX / ViewportSize.x <= UISize / (720.0f * aspectRatio);
 }
 
 void AppLayer::RecalculateUICamera(const glm::vec2& viewport)

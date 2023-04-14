@@ -53,6 +53,8 @@ public:
 		m_ZoomLevel = level;
 	}
 
+	const float GetCameraZoonLevel() const { return m_ZoomLevel; }
+
 	void Move(float xOffset, float yOffset)
 	{
 		EG_TRACE("OFfset of camera movement X:", xOffset, "Y:", yOffset);

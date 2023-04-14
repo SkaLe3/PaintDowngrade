@@ -3,6 +3,7 @@
 #include "Components/ShapeComponent.h"
 #include "GroupScript.h"
 #include <Engine/Core/Input.h>
+#include "CameraController.h"
 
 #define stringify( name ) #name
 
@@ -82,24 +83,70 @@ void WorkspaceManager::OnMouseClick(const glm::vec2& coords)
 		DrawEntity(coords);
 		return;
 	}
-	if (m_State->m_Action == ActionType::Cursor)
+	if (m_State->m_Action == ActionType::Cursor && !Engine::Input::IsKeyPressed(Engine::Key::Space))
 	{
 		Engine::Entity entity = Raycast(coords);
 
 		if (!Engine::Input::IsKeyPressed(Engine::Key::LeftControl))
-		{ 
-			DeselectAll();
-			m_SelectedEntities.clear();
+		{
+			if (!m_SelectedEntities.Has(entity))
+			{
+				DeselectAll();
+				if (entity && entity != m_RootGroup)
+					Select(entity);
+			}
 		}
+		else
+			if (entity && entity != m_RootGroup)
+				if (m_SelectedEntities.Has(entity))
+					Deselect(entity);
+				else
+					Select(entity);
 
-		if (entity && entity != m_RootGroup)
-			Select(entity);
 	}
 }
 
-void WorkspaceManager::OnMouseMoved(float xOffset, float yOffset)
+void WorkspaceManager::OnMouseReleased(const glm::vec2& coords)
 {
-	
+#if 0
+	if (!Engine::Input::IsKeyPressed(Engine::Key::LeftControl))
+	{
+		Engine::Entity entity = Raycast(coords);
+		if (!entity && entity != m_RootGroup)
+		{
+			DeselectAll();
+			m_SelectedEntities.Clear();
+		}
+	}
+#endif
+}
+
+
+
+void WorkspaceManager::OnMouseMoved(const glm::vec2& oldCoords, const glm::vec2& newCoords, Engine::Entity camera)
+{
+	if (m_State->m_Action == ActionType::Cursor)
+	{
+		bool spacePressed = Engine::Input::IsKeyPressed(Engine::Key::Space);
+		bool mousePressed = Engine::Input::IsMouseButtonPressed(Engine::Mouse::Button0);
+
+		if (!spacePressed && mousePressed)
+		{
+
+			glm::vec2 delta = { newCoords.x - oldCoords.x,newCoords.y - oldCoords.y };
+
+			Engine::Entity entity = Raycast(oldCoords);
+
+			
+			if (entity && m_SelectedEntities.Has(entity))
+			{
+				Move(delta.x, delta.y);
+
+			}
+
+
+		}
+	}
 }
 
 void WorkspaceManager::DrawEntity(const glm::vec2& coords)
@@ -179,38 +226,35 @@ Engine::Entity WorkspaceManager::Raycast(const glm::vec2& coords)
 void WorkspaceManager::Select(Engine::Entity entity)
 {
 
-
-	bool contains = false;
 	auto& src = entity.GetComponent<Engine::SpriteRendererComponent>();
 	auto& sc = entity.GetComponent<ShapeComponent>();
-	for (std::vector<Engine::Entity>::iterator it = m_SelectedEntities.begin(); it != m_SelectedEntities.end();)
-	{
-		contains = *it == entity;
-		if (contains)
-		{
-			EG_TRACE("Deselected Shape:	x:",
-				entity.GetComponent<Engine::TransformComponent>().Translation.x, "y:",
-				entity.GetComponent<Engine::TransformComponent>().Translation.y);
-
-			m_SelectedEntities.erase(it);
-			src.Texture = sc.DefaultTexture;
-			src.Color.w = { 1.0f };
-			src.Color -= 0.15f;
-			return;
-		}
-		it++;
-	}
-
 
 
 	EG_TRACE("Selected Shape: x:",
 		entity.GetComponent<Engine::TransformComponent>().Translation.x, "y:",
 		entity.GetComponent<Engine::TransformComponent>().Translation.y);
 
-	m_SelectedEntities.emplace_back(entity);
+	m_SelectedEntities.Add(entity);
 	src.Texture = sc.SelectionTexture;
 	src.Color.w = { 0.8f };
 	src.Color += 0.15f;
+}
+
+void WorkspaceManager::Deselect(Engine::Entity entity)
+{
+
+	auto& src = entity.GetComponent<Engine::SpriteRendererComponent>();
+	auto& sc = entity.GetComponent<ShapeComponent>();
+
+	EG_TRACE("Deselected Shape:	x:",
+		entity.GetComponent<Engine::TransformComponent>().Translation.x, "y:",
+		entity.GetComponent<Engine::TransformComponent>().Translation.y);
+
+	m_SelectedEntities.Remove(entity);
+	src.Texture = sc.DefaultTexture;
+	src.Color.w = { 1.0f };
+	src.Color -= 0.15f;
+
 }
 
 void WorkspaceManager::DeselectAll()
@@ -223,6 +267,7 @@ void WorkspaceManager::DeselectAll()
 		src.Color.w = { 1.0f };
 		src.Color -= 0.15f;
 	}
+	m_SelectedEntities.Clear();
 }
 
 // Add constants for max and min sizes;
