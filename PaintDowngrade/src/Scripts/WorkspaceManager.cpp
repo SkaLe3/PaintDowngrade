@@ -85,7 +85,7 @@ void WorkspaceManager::OnMouseClick(const glm::vec2& coords)
 	}
 	if (m_State->m_Action == ActionType::Cursor && !Engine::Input::IsKeyPressed(Engine::Key::Space))
 	{
-		Engine::Entity entity = Raycast(coords);
+		Engine::Entity entity = Raycast(coords, m_RootGroup);
 
 		if (!Engine::Input::IsKeyPressed(Engine::Key::LeftControl))
 		{
@@ -121,7 +121,7 @@ void WorkspaceManager::OnMouseReleased(const glm::vec2& coords)
 #endif
 }
 
-
+// Make RayCst to take a group to serach 
 
 void WorkspaceManager::OnMouseMoved(const glm::vec2& oldCoords, const glm::vec2& newCoords, Engine::Entity camera)
 {
@@ -135,16 +135,11 @@ void WorkspaceManager::OnMouseMoved(const glm::vec2& oldCoords, const glm::vec2&
 
 			glm::vec2 delta = { newCoords.x - oldCoords.x,newCoords.y - oldCoords.y };
 
-			Engine::Entity entity = Raycast(oldCoords);
+			Engine::Entity entity = Raycast(oldCoords, m_RootGroup);
 
 			
 			if (entity && m_SelectedEntities.Has(entity))
-			{
 				Move(delta.x, delta.y);
-
-			}
-
-
 		}
 	}
 }
@@ -182,7 +177,6 @@ void WorkspaceManager::DrawEntity(const glm::vec2& coords)
 
 void WorkspaceManager::EnableFollowCursorShape()
 {
-	EG_ASSERT(!m_FollowCursorShape, "Attempt to create FollowCursorShape when it already exist!");
 	if (!m_FollowCursorShape)
 	{
 		m_FollowCursorShape = m_Entity.GetScene()->CreateEntity("FollowCursor");
@@ -213,10 +207,10 @@ glm::vec2 WorkspaceManager::ToCameraSpace(const glm::vec2& coords)
 	return glm::vec2{ result.x, result.y };
 }
 
-Engine::Entity WorkspaceManager::Raycast(const glm::vec2& coords)
+Engine::Entity WorkspaceManager::Raycast(const glm::vec2& coords, Engine::Entity group)
 {
 	Engine::Ref<Engine::Entity> emptyEntity = Engine::CreateRef<Engine::Entity>();
-	bool hit = m_RootGroup.GetComponent<ShapeComponent>().IsHit(coords, emptyEntity);
+	bool hit = group.GetComponent<ShapeComponent>().IsHit(coords, emptyEntity);
 	if (hit)
 		return *emptyEntity;
 	return Engine::Entity();
@@ -236,8 +230,8 @@ void WorkspaceManager::Select(Engine::Entity entity)
 
 	m_SelectedEntities.Add(entity);
 	src.Texture = sc.SelectionTexture;
-	src.Color.w = { 0.8f };
 	src.Color += 0.15f;
+	src.Color.w = { 0.8f };
 }
 
 void WorkspaceManager::Deselect(Engine::Entity entity)
@@ -252,8 +246,8 @@ void WorkspaceManager::Deselect(Engine::Entity entity)
 
 	m_SelectedEntities.Remove(entity);
 	src.Texture = sc.DefaultTexture;
-	src.Color.w = { 1.0f };
 	src.Color -= 0.15f;
+	src.Color.w = { 1.0f };
 
 }
 
@@ -261,13 +255,8 @@ void WorkspaceManager::DeselectAll()
 {
 	for (auto& entity : m_SelectedEntities)
 	{
-		auto& src = entity.GetComponent<Engine::SpriteRendererComponent>();
-		auto& sc = entity.GetComponent<ShapeComponent>();
-		src.Texture = sc.DefaultTexture;
-		src.Color.w = { 1.0f };
-		src.Color -= 0.15f;
+		Deselect(entity);
 	}
-	m_SelectedEntities.Clear();
 }
 
 // Add constants for max and min sizes;

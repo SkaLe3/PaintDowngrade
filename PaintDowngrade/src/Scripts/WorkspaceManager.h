@@ -43,7 +43,7 @@ public:
 	void Deserialize() {}
 
 	glm::vec2 ToCameraSpace(const glm::vec2& coords);
-	Engine::Entity Raycast(const glm::vec2& coords);
+	Engine::Entity Raycast(const glm::vec2& coords, Engine::Entity group);
 	void Select(Engine::Entity entity);
 	void Deselect(Engine::Entity entity);
 	void DeselectAll();
