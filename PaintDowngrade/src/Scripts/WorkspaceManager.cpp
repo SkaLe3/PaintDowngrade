@@ -146,6 +146,9 @@ void WorkspaceManager::DrawEntity(const glm::vec2& coords)
 {
 	static float index = 0.00001f;
 
+	if (index >= 0.01999f)
+		return;
+
 	Engine::Entity newEntity = m_Entity.GetScene()->CreateEntity(enum_to_str[(int)m_State->m_Shape]);
 	auto& src = newEntity.AddComponent<Engine::SpriteRendererComponent>(m_State->Color);
 
@@ -171,6 +174,38 @@ void WorkspaceManager::DrawEntity(const glm::vec2& coords)
 	DisableFollowCursorShape();
 	EnableFollowCursorShape();
 	index += 0.00001f;
+
+
+}
+
+void WorkspaceManager::Group()
+{
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+	if (selectionGroup->GetCount() > 1)
+	{
+		// Check if in the same container or objects in RootGroup
+		// Create new group in this container
+		// Move this Entites to this group
+		// Change z coordinates (may be use function Move that will calculate it automatic)
+
+		GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+		Engine::Entity placeEntity = rootGroup->FindContainer(m_SelectionGroup); //If contains all of the entities that not on the 0 level returns this container
+		if (placeEntity)
+		{
+			GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+			Engine::Entity newEntity = placeGroup->CreateGroup(m_SelectionGroup);
+			placeGroup->Ship(newEntity, m_SelectionGroup);
+			placeGroup->Add(newEntity);
+
+			EG_TRACE("x: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.x,
+				"y: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.y,
+				"z: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.z);
+			EG_TRACE("Width: ", newEntity.GetComponent<Engine::TransformComponent>().Scale.x,
+				"Height: ", newEntity.GetComponent<Engine::TransformComponent>().Scale.y);
+		}
+	}
+
 }
 
 void WorkspaceManager::EnableFollowCursorShape()
@@ -223,8 +258,11 @@ void WorkspaceManager::Select(Engine::Entity entity)
 
 
 	EG_TRACE("Selected Shape: x:",
-		entity.GetComponent<Engine::TransformComponent>().Translation.x, "y:",
-		entity.GetComponent<Engine::TransformComponent>().Translation.y);
+		entity.GetComponent<Engine::TransformComponent>().Translation.x, 
+		"y:", entity.GetComponent<Engine::TransformComponent>().Translation.y,
+		"z:", entity.GetComponent<Engine::TransformComponent>().Translation.z,
+		"Width:", entity.GetComponent<Engine::TransformComponent>().Scale.x,
+		"Height:", entity.GetComponent<Engine::TransformComponent>().Scale.y);
 
 	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
 

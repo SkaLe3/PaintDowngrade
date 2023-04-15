@@ -26,7 +26,7 @@ public:
 
 
 	void DestroyEntity() {}
-	void Group() {}
+	void Group();
 	void Ungroup() {}
 	void AddToGroup() {}
 	void RemoveFromGroup() {}
@@ -70,4 +70,6 @@ private:
 	Engine::Ref<CurrentState> m_State = Engine::CreateRef<CurrentState>();
 
 	Engine::Entity m_FollowCursorShape;
+
+	uint32_t m_CurrentGroupIndex = 0;
 };

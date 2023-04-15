@@ -84,12 +84,12 @@ bool AppLayer::OnMouseButtonPressed(Engine::MouseButtonPressedEvent& e)
 
 	if (clickOnUI)
 	{
-		EG_TRACE("Click on UI");
+		//EG_TRACE("Click on UI");
 		UI->OnMouseClick(ToCameraSpace(m_UICamera, mouseInRenderCoords));
 	}
 	else
 	{
-		EG_TRACE("Click on Workspace");
+		//EG_TRACE("Click on Workspace");
 		Workspace->OnMouseClick(ToCameraSpace(m_WorkspaceCamera, mouseInRenderCoords));
 
 	}

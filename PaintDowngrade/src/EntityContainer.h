@@ -12,6 +12,8 @@ public:
 	std::vector<Engine::Entity>& Get() { return m_Entities; }
 	operator std::vector<Engine::Entity>() { return m_Entities; }
 
+	size_t GetCount() const { return m_Entities.size(); }
+
 public:
 	std::vector<Engine::Entity>::iterator begin() { return m_Entities.begin(); }
 	std::vector<Engine::Entity>::iterator end() { return m_Entities.end(); }
