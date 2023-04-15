@@ -22,11 +22,15 @@ struct ShapeComponent
 	ShapeComponent(const ShapeComponent&) = default;
 	ShapeComponent(ShapeType type, const glm::vec2& size, const glm::vec2& translate, Engine::Entity entity)
 		: Type(type), Size(size), LocalTranslate(translate), m_Entity(entity) {}
+	ShapeComponent(ShapeType type, Engine::Entity entity)
+		: Type(type), m_Entity(entity) {}
 
 	//Radius is x coordinate devided by 2
 	//Because I don't have circle rendering yet
 
 	bool IsHit(const glm::vec2& coords, Engine::Ref<Engine::Entity> emptyEntity);
+	void Move(float x, float y);
+	void Resize(float x, float y, bool linked);
 private:
 	Engine::Entity m_Entity;
 

@@ -185,14 +185,14 @@ void UIManager::OnCreate()
 	UIspec.OnClickTexture = UIspec.RealTexture;
 	UIspec.ToggleGroup = ToggleGroups::None;
 	ent = CreateUIElement(UIspec);
-	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, -3, 0, false);
+	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, -4, 0, false);
 
 	UIspec.Name = "XarrowRight";
 	UIspec.Position.x = 230;
 	UIspec.RealTexture = m_Textures["ArrowRight"];
 	UIspec.OnClickTexture = UIspec.RealTexture;
 	ent = CreateUIElement(UIspec);
-	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, 3, 0, false);
+	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, 4, 0, false);
 
 
 	UIspec.Name = "YarrowLeft";
@@ -201,7 +201,7 @@ void UIManager::OnCreate()
 	UIspec.RealTexture = m_Textures["ArrowLeft"];
 	UIspec.OnClickTexture = UIspec.RealTexture;
 	ent = CreateUIElement(UIspec);
-	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, 0, -3, false);
+	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, 0, -4, false);
 
 
 	UIspec.Name = "YarrowRight";
@@ -210,7 +210,7 @@ void UIManager::OnCreate()
 	UIspec.RealTexture = m_Textures["ArrowRight"];
 	UIspec.OnClickTexture = UIspec.RealTexture;
 	ent = CreateUIElement(UIspec);
-	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, 0, 3, false);
+	CreateButton<ChangeBrushSizeCommand>(ent, UIspec, 0, 4, false);
 
 
 	UIspec.Name = "GroupButton";
@@ -343,7 +343,7 @@ void UIManager::OnKeyPressed(Engine::KeyCode key)
 	bool ctrlPressed = Engine::Input::IsKeyPressed(Engine::Key::LeftControl) || Engine::Input::IsKeyPressed(Engine::Key::RightControl);
 
 	if (shiftPressed) 
-		value = 5;
+		value = 4;
 	if (ctrlPressed)
 		link = true;
 
@@ -353,25 +353,25 @@ void UIManager::OnKeyPressed(Engine::KeyCode key)
 		case Engine::Key::Left:
 		{
 
-			ChangeBrushSizeCommand command(m_Workspace, -value, 0, link);
+			ChangeBrushSizeCommand command(m_Workspace, -value*2, 0, link);
 			command.Execute();
 			break;
 		}
 		case Engine::Key::Right:
 		{
-			ChangeBrushSizeCommand command(m_Workspace, value, 0, link);
+			ChangeBrushSizeCommand command(m_Workspace, value*2, 0, link);
 			command.Execute();
 			break;
 		}
 		case Engine::Key::Down:
 		{
-			ChangeBrushSizeCommand command(m_Workspace, 0, -value, link);
+			ChangeBrushSizeCommand command(m_Workspace, 0, -value*2, link);
 			command.Execute();
 			break;
 		}
 		case Engine::Key::Up:
 		{
-			ChangeBrushSizeCommand command(m_Workspace, 0, value, link);
+			ChangeBrushSizeCommand command(m_Workspace, 0, value*2, link);
 			command.Execute();
 			break;
 		}
@@ -384,25 +384,25 @@ void UIManager::OnKeyPressed(Engine::KeyCode key)
 			case Engine::Key::Left:
 			{
 
-				ChangeSelectedSizeCommand command(m_Workspace, -value, 0, link);
+				ChangeEntitySizeCommand command(m_Workspace, -value, 0, link);
 				command.Execute();
 				break;
 			}
 			case Engine::Key::Right:
 			{
-				ChangeSelectedSizeCommand command(m_Workspace, value, 0, link);
+				ChangeEntitySizeCommand command(m_Workspace, value, 0, link);
 				command.Execute();
 				break;
 			}
 			case Engine::Key::Down:
 			{
-				ChangeSelectedSizeCommand command(m_Workspace, 0, -value, link);
+				ChangeEntitySizeCommand command(m_Workspace, 0, -value, link);
 				command.Execute();
 				break;
 			}
 			case Engine::Key::Up:
 			{
-				ChangeSelectedSizeCommand command(m_Workspace, 0, value, link);
+				ChangeEntitySizeCommand command(m_Workspace, 0, value, link);
 				command.Execute();
 				break;
 			}

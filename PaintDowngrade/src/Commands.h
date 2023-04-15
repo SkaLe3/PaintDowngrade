@@ -58,6 +58,7 @@ public:
 		m_Workspace->EnableFollowCursorShape();
 
 		m_State->m_Action = ActionType::Draw;
+		//m_Workspace->DeselectAll();
 		EG_INFO("Draw Mode and Rectangle Shape were Selected!");
 	}
 };
@@ -124,15 +125,15 @@ private:
 };
 
 
-class ChangeSelectedSizeCommand : public Command
+class ChangeEntitySizeCommand : public Command
 {
 public:
-	ChangeSelectedSizeCommand(WorkspaceManager* workspace, float x, float y, bool linked)
+	ChangeEntitySizeCommand(WorkspaceManager* workspace, float x, float y, bool linked)
 		: Command(workspace), m_X(x), m_Y(y), m_Linked(linked) {}
 
 	virtual void Execute()
 	{
-		m_Workspace->Resize(m_X, m_Y, m_Linked);
+		m_Workspace->GetSelectionGroup().GetComponent<ShapeComponent>().Resize(m_X, m_Y, m_Linked);
 	}
 private:
 	float m_X;
@@ -148,7 +149,7 @@ public:
 
 	virtual void Execute()
 	{
-		m_Workspace->Move(m_X, m_Y);
+		m_Workspace->GetSelectionGroup().GetComponent<ShapeComponent>().Move(m_X, m_Y);
 	}
 private:
 	float m_X;

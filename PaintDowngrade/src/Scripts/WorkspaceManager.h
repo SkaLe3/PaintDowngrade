@@ -51,6 +51,7 @@ public:
 
 	 
 	Engine::Ref<CurrentState> GetCurrentState() { return m_State; }
+	Engine::Entity GetSelectionGroup() { return m_SelectionGroup; }
 public:
 	static WorkspaceManager* Get() {
 		EG_ASSERT(s_Instance, "WorkspaceManager has not been instantiated");
@@ -63,7 +64,7 @@ private:
 private:
 
 	Engine::Entity m_RootGroup;
-	EntityContainer m_SelectedEntities;
+	Engine::Entity m_SelectionGroup;
 	std::unordered_map<std::string, Engine::Ref<Engine::Texture2D>> m_Textures;
 
 	Engine::Ref<CurrentState> m_State = Engine::CreateRef<CurrentState>();

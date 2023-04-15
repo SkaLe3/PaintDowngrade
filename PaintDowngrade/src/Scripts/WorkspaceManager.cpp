@@ -41,6 +41,10 @@ void WorkspaceManager::OnCreate()
 	nsc.Instance = nsc.InstantiateScript(m_RootGroup);
 	nsc.Instance->OnCreate();
 
+	m_SelectionGroup = m_Entity.GetScene()->CreateEntity("SelectionGroup");
+	m_SelectionGroup.AddComponent<Engine::NativeScriptComponent>().Bind<GroupScript>();
+	m_SelectionGroup.AddComponent<ShapeComponent>(ShapeType::Group, m_SelectionGroup);
+
 	sc.Size.x = tc.Scale.x = 800;
 	sc.Size.y = tc.Scale.y = 450;
 	tc.Translation.z = 0.01f;
@@ -63,8 +67,8 @@ void WorkspaceManager::OnUpdate(Engine::Timestep ts)
 		if (m_FollowCursorShape) 
 		{
 			auto& tc = m_FollowCursorShape.GetComponent<Engine::TransformComponent>();
-			tc.Translation.x = spaceCoords.x;
-			tc.Translation.y = spaceCoords.y;
+			tc.Translation.x = (int)spaceCoords.x;
+			tc.Translation.y = (int)spaceCoords.y;
 			tc.Scale.x = m_State->Size.x;
 			tc.Scale.y = m_State->Size.y;
 			if (m_State->m_Shape == ShapeType::Circle)
@@ -83,13 +87,16 @@ void WorkspaceManager::OnMouseClick(const glm::vec2& coords)
 		DrawEntity(coords);
 		return;
 	}
+
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+
 	if (m_State->m_Action == ActionType::Cursor && !Engine::Input::IsKeyPressed(Engine::Key::Space))
 	{
 		Engine::Entity entity = Raycast(coords, m_RootGroup);
 
 		if (!Engine::Input::IsKeyPressed(Engine::Key::LeftControl))
 		{
-			if (!m_SelectedEntities.Has(entity))
+			if (!selectionGroup->Has(entity))
 			{
 				DeselectAll();
 				if (entity && entity != m_RootGroup)
@@ -98,7 +105,7 @@ void WorkspaceManager::OnMouseClick(const glm::vec2& coords)
 		}
 		else
 			if (entity && entity != m_RootGroup)
-				if (m_SelectedEntities.Has(entity))
+				if (selectionGroup->Has(entity))
 					Deselect(entity);
 				else
 					Select(entity);
@@ -108,17 +115,7 @@ void WorkspaceManager::OnMouseClick(const glm::vec2& coords)
 
 void WorkspaceManager::OnMouseReleased(const glm::vec2& coords)
 {
-#if 0
-	if (!Engine::Input::IsKeyPressed(Engine::Key::LeftControl))
-	{
-		Engine::Entity entity = Raycast(coords);
-		if (!entity && entity != m_RootGroup)
-		{
-			DeselectAll();
-			m_SelectedEntities.Clear();
-		}
-	}
-#endif
+
 }
 
 // Make RayCst to take a group to serach 
@@ -137,9 +134,10 @@ void WorkspaceManager::OnMouseMoved(const glm::vec2& oldCoords, const glm::vec2&
 
 			Engine::Entity entity = Raycast(oldCoords, m_RootGroup);
 
-			
-			if (entity && m_SelectedEntities.Has(entity))
-				Move(delta.x, delta.y);
+			GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+			if (entity && selectionGroup->Has(entity))
+				m_SelectionGroup.GetComponent<ShapeComponent>().Move(delta.x, delta.y);
 		}
 	}
 }
@@ -161,14 +159,14 @@ void WorkspaceManager::DrawEntity(const glm::vec2& coords)
 	tc.Scale.y = m_State->Size.y;
 	if (m_State->m_Shape == ShapeType::Circle)
 		tc.Scale.y = tc.Scale.x;
-	tc.Translation.x = coords.x;
-	tc.Translation.y = coords.y;
+	tc.Translation.x = (int)coords.x;
+	tc.Translation.y = (int)coords.y;
 	tc.Translation.z = 0.02f + index;
 
 	ShapeComponent& sc = newEntity.AddComponent<ShapeComponent>(m_State->m_Shape, m_State->Size, glm::vec2{ tc.Translation.x, tc.Translation.y}, newEntity);
 	sc.DefaultTexture = src.Texture;
 	sc.SelectionTexture = m_Textures[key + "Selection"];
-	static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->Push(newEntity);
+	static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->Add(newEntity);
 
 	DisableFollowCursorShape();
 	EnableFollowCursorShape();
@@ -228,7 +226,9 @@ void WorkspaceManager::Select(Engine::Entity entity)
 		entity.GetComponent<Engine::TransformComponent>().Translation.x, "y:",
 		entity.GetComponent<Engine::TransformComponent>().Translation.y);
 
-	m_SelectedEntities.Add(entity);
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+	selectionGroup->Add(entity);
 	src.Texture = sc.SelectionTexture;
 	src.Color += 0.15f;
 	src.Color.w = { 0.8f };
@@ -244,7 +244,9 @@ void WorkspaceManager::Deselect(Engine::Entity entity)
 		entity.GetComponent<Engine::TransformComponent>().Translation.x, "y:",
 		entity.GetComponent<Engine::TransformComponent>().Translation.y);
 
-	m_SelectedEntities.Remove(entity);
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+	selectionGroup->Remove(entity);
 	src.Texture = sc.DefaultTexture;
 	src.Color -= 0.15f;
 	src.Color.w = { 1.0f };
@@ -253,10 +255,19 @@ void WorkspaceManager::Deselect(Engine::Entity entity)
 
 void WorkspaceManager::DeselectAll()
 {
-	for (auto& entity : m_SelectedEntities)
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+	for (Engine::Entity entity : *selectionGroup)
 	{
-		Deselect(entity);
+		auto& src = entity.GetComponent<Engine::SpriteRendererComponent>();
+		auto& sc = entity.GetComponent<ShapeComponent>();
+		src.Texture = sc.DefaultTexture;
+		src.Color -= 0.15f;
+		src.Color.w = { 1.0f };
 	}
+	selectionGroup->GetEntities().Clear();
+
+
 }
 
 // Add constants for max and min sizes;
@@ -284,8 +295,8 @@ void WorkspaceManager::Resize(float x, float y, bool linked)
 		x += y;
 		y = x;
 	}
-
-	for (auto entity : m_SelectedEntities)
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	for (auto entity : *selectionGroup)
 	{
 		auto& tc = entity.GetComponent<Engine::TransformComponent>();
 		if (linked)
@@ -297,13 +308,4 @@ void WorkspaceManager::Resize(float x, float y, bool linked)
 	}
 }
 
-void WorkspaceManager::Move(float x, float y)
-{
-	for (auto entity : m_SelectedEntities)
-	{
-		auto& tc = entity.GetComponent<Engine::TransformComponent>();
 
-		tc.Translation.x += x;
-		tc.Translation.y += y;
-	}
-}
