@@ -3,7 +3,7 @@
 
 
 
-// TODO: Get State from WorkspaceManager
+
 class Command
 {
 public:
@@ -134,6 +134,8 @@ public:
 	virtual void Execute()
 	{
 		m_Workspace->GetSelectionGroup().GetComponent<ShapeComponent>().Resize(m_X, m_Y, m_Linked);
+		m_Workspace->ResizeGroups();
+		
 	}
 private:
 	float m_X;
@@ -150,6 +152,7 @@ public:
 	virtual void Execute()
 	{
 		m_Workspace->GetSelectionGroup().GetComponent<ShapeComponent>().Move(m_X, m_Y);
+		m_Workspace->ResizeGroups();
 	}
 private:
 	float m_X;
@@ -166,6 +169,8 @@ public:
 	virtual void Execute()
 	{
 		m_Workspace->Group();
+		m_Workspace->ResizeGroups();
+
 	}
 
 };

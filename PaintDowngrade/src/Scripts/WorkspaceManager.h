@@ -48,6 +48,8 @@ public:
 	void Deselect(Engine::Entity entity);
 	void DeselectAll();
 
+	void ResizeGroups();
+
 
 	 
 	Engine::Ref<CurrentState> GetCurrentState() { return m_State; }

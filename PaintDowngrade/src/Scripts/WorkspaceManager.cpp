@@ -4,6 +4,7 @@
 #include "GroupScript.h"
 #include <Engine/Core/Input.h>
 #include "CameraController.h"
+#include "Commands.h"
 
 #define stringify( name ) #name
 
@@ -115,6 +116,15 @@ void WorkspaceManager::OnMouseClick(const glm::vec2& coords)
 
 void WorkspaceManager::OnMouseReleased(const glm::vec2& coords)
 {
+	GroupScript* selection = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	for (Engine::Entity entity : *selection)
+	{
+		auto& tc = entity.GetComponent<Engine::TransformComponent>();
+		float deltaX = tc.Translation.x - glm::round(tc.Translation.x);
+		float deltaY = tc.Translation.y - glm::round(tc.Translation.y);
+		auto& sc = entity.GetComponent<ShapeComponent>();
+		sc.Move(-deltaX, -deltaY);
+	}
 
 }
 
@@ -129,15 +139,18 @@ void WorkspaceManager::OnMouseMoved(const glm::vec2& oldCoords, const glm::vec2&
 
 		if (!spacePressed && mousePressed)
 		{
-
 			glm::vec2 delta = { newCoords.x - oldCoords.x,newCoords.y - oldCoords.y };
 
-			Engine::Entity entity = Raycast(oldCoords, m_RootGroup);
+			Engine::Entity entity = Raycast(oldCoords, m_SelectionGroup);
 
 			GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
 
 			if (entity && selectionGroup->Has(entity))
-				m_SelectionGroup.GetComponent<ShapeComponent>().Move(delta.x, delta.y);
+			{
+				ChangeSelectedPositionCommand command(this, delta.x, delta.y);
+				command.Execute();
+				//m_SelectionGroup.GetComponent<ShapeComponent>().Move(delta.x, delta.y);
+			}
 		}
 	}
 }
@@ -184,19 +197,22 @@ void WorkspaceManager::Group()
 
 	if (selectionGroup->GetCount() > 1)
 	{
-		// Check if in the same container or objects in RootGroup
-		// Create new group in this container
-		// Move this Entites to this group
-		// Change z coordinates (may be use function Move that will calculate it automatic)
+
 
 		GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
-		Engine::Entity placeEntity = rootGroup->FindContainer(m_SelectionGroup); //If contains all of the entities that not on the 0 level returns this container
+		Engine::Entity placeEntity = rootGroup->FindContainerWithSelection(m_SelectionGroup); //If contains all of the entities that not on the 0 level returns this container
 		if (placeEntity)
 		{
 			GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 			Engine::Entity newEntity = placeGroup->CreateGroup(m_SelectionGroup);
-			placeGroup->Ship(newEntity, m_SelectionGroup);
+			placeGroup->ShipTo(newEntity, m_SelectionGroup);
 			placeGroup->Add(newEntity);
+
+			GroupScript* newGroup = static_cast<GroupScript*>(newEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+			newGroup->SetIndex(placeGroup->GetIndex() + 1);
+			newGroup->RefreshIndices();
+
+			EG_TRACE("Created Group Index", newGroup->GetIndex());
 
 			EG_TRACE("x: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.x,
 				"y: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.y,
@@ -270,6 +286,9 @@ void WorkspaceManager::Select(Engine::Entity entity)
 	src.Texture = sc.SelectionTexture;
 	src.Color += 0.15f;
 	src.Color.w = { 0.8f };
+
+	if (entity.HasComponent<Engine::NativeScriptComponent>())
+		src.Color.w = 1.0f;
 }
 
 void WorkspaceManager::Deselect(Engine::Entity entity)
@@ -289,6 +308,9 @@ void WorkspaceManager::Deselect(Engine::Entity entity)
 	src.Color -= 0.15f;
 	src.Color.w = { 1.0f };
 
+	if (entity.HasComponent<Engine::NativeScriptComponent>())
+		src.Color.w = 0.1f;	
+
 }
 
 void WorkspaceManager::DeselectAll()
@@ -301,10 +323,21 @@ void WorkspaceManager::DeselectAll()
 		auto& sc = entity.GetComponent<ShapeComponent>();
 		src.Texture = sc.DefaultTexture;
 		src.Color -= 0.15f;
-		src.Color.w = { 1.0f };
+		src.Color.w =  1.0f;
+		if (entity.HasComponent<Engine::NativeScriptComponent>())
+			src.Color.w = 0.1f;
 	}
 	selectionGroup->GetEntities().Clear();
 
+
+}
+
+void WorkspaceManager::ResizeGroups()
+{
+	GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	for (Engine::Entity entity : *rootGroup)
+		if (entity.HasComponent<Engine::NativeScriptComponent>())
+			static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance)->Resize();
 
 }
 

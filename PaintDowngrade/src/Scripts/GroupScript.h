@@ -21,10 +21,11 @@ public:
 	bool Has(Engine::Entity entity);
 	void Add(Engine::Entity entity);
 	void Remove(Engine::Entity entity);
-	Engine::Entity FindContainer(Engine::Entity groupEntity);
-	bool CheckSelectionPresence(Engine::Entity groupEntity);
+	void Resize();
+	Engine::Entity FindContainerWithSelection(Engine::Entity selectionEntity);
+	bool CheckSelectionPresence(Engine::Entity selectionEntity);
 	Engine::Entity CreateGroup(Engine::Entity selection);
-	void Ship(Engine::Entity destinationGroupEntity, Engine::Entity selectionEntity);
+	void ShipTo(Engine::Entity destinationGroupEntity, Engine::Entity selectionEntity);
 
 
 	EntityContainer& GetEntities() { return m_Entities; }

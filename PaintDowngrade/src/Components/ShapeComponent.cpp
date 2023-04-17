@@ -13,7 +13,7 @@ bool ShapeComponent::IsHit(const glm::vec2& coords, Engine::Ref<Engine::Entity> 
 		{
 			auto& emptytc = emptyEntity->GetComponent<Engine::TransformComponent>();
 			auto& thistc = m_Entity.GetComponent<Engine::TransformComponent>();
-			if (emptytc.Translation.z < thistc.Translation.z)
+			if (emptytc.Translation.z <= thistc.Translation.z)
 				*emptyEntity = m_Entity;
 		}
 		else
@@ -36,6 +36,8 @@ void ShapeComponent::Move(float x, float y)
 
 	tc.Translation.x += x;
 	tc.Translation.y += y;
+	tc.Translation.x = tc.Translation.x;
+	tc.Translation.y = tc.Translation.y;
 	if (m_Entity.HasComponent<Engine::NativeScriptComponent>())
 	{
 
