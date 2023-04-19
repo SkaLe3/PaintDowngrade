@@ -14,32 +14,72 @@ void GroupScript::Add(Engine::Entity entity)
 
 }
 
-void GroupScript::Remove(Engine::Entity entity)
+Engine::Entity GroupScript::Remove(Engine::Entity entity)
 {
 	m_Entities.Remove(entity);
+	return entity;
 }
 
-void GroupScript::RemoveRecursive(Engine::Entity selectionEntity)
+bool GroupScript::RemoveRecursive(Engine::Entity selectionEntity)
 {
+	bool shouldExist = true;
 	GroupScript* selectionGroup = static_cast<GroupScript*>(selectionEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 
+	int32_t count = GetCount();
 	size_t index = 0;
-	for (size_t i = 0; i < GetCount(); i++) // Empty group can't exist
+	for (size_t i = 0; i < count; i++, index++) // Empty group can't exist
 	{
+
 		Engine::Entity entity = GetEntities().Get()[index];
 		for (Engine::Entity sEntity : *selectionGroup)
-		if (entity == sEntity)
-		{
-			Remove(entity);
-			break;
+			if (entity == sEntity)
+			{
+				Remove(entity);
+				index--;
+				break;
+			}
 
-		}
-		index++;
 	}
 
-	for (Engine::Entity entity : *this)
+	count = GetCount();
+	index = 0;
+	for (size_t i = 0; i < count; i++, index++) // Empty group can't exist
+	{
+
+		Engine::Entity entity = GetEntities().Get()[index];
 		if (entity.HasComponent<Engine::NativeScriptComponent>())
-			static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance)->RemoveRecursive(selectionEntity);
+		{
+			GroupScript* group = static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance);
+			shouldExist = group->RemoveRecursive(selectionEntity);
+#if 1	
+			if (!shouldExist)
+			{
+
+				if (group->GetCount() > 0)
+				{
+					Engine::Entity tempEntity = group->GetEntities().Get()[0];
+					group->Remove(tempEntity);
+					Add(tempEntity);
+					EG_TRACE("count ", group->GetCount());
+
+				}
+				Engine::Entity removed = Remove(entity);
+				removed.Destroy();
+				index--;
+
+			}
+
+#endif
+		}
+	}
+	 
+	RefreshIndices();
+
+
+
+	if (GetCount() > 1)
+		return true;
+	return false;
 }
 
 void GroupScript::Resize()
@@ -114,14 +154,19 @@ bool GroupScript::CheckSelectionPresence(Engine::Entity selectionEntity)
 {
 	GroupScript* selection = static_cast<GroupScript*>(selectionEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 	uint32_t count = selection->GetCount();
-	if (selection->GetIndex() != 0)
+	EG_TRACE("count1 = ", count);
+	if (GetIndex() != 0) {
 		for (Engine::Entity entity : *selection)
 		{
 			glm::vec3 translation = entity.GetComponent<Engine::TransformComponent>().Translation;
+			EG_TRACE("Translation.z = ", translation.z);
 			if (translation.z < 0.03f)
 				--count;
 		}
-
+		EG_TRACE("count2 = ", count);
+		if (count == GetCount())
+			return false;
+	}
 	for (Engine::Entity toSearchEntity : *selection)
 	{
 		for (Engine::Entity candidate : *this)
@@ -133,6 +178,7 @@ bool GroupScript::CheckSelectionPresence(Engine::Entity selectionEntity)
 			}
 		}
 	}
+	EG_TRACE("count3 = ", count);
 	return count == 0;
 	
 }
@@ -169,17 +215,21 @@ Engine::Entity GroupScript::CreateGroup(Engine::Entity selection)
 	return newGroup;
 }
 
-void GroupScript::ShipTo(Engine::Entity destinationGroupEntity, Engine::Entity selectionEntity)
+void GroupScript::ShipTo(Engine::Entity destinationGroupEntity, Engine::Entity selectionEntity, Engine::Entity rootGroupEntity)
 {
 	GroupScript* destinationGroup = static_cast<GroupScript*>(destinationGroupEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 	GroupScript* selectionGroup = static_cast<GroupScript*>(selectionEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 	GroupScript* thisGroup = static_cast<GroupScript*>(this->GetComponent<Engine::NativeScriptComponent>().Instance);
+	GroupScript* rootGroup = static_cast<GroupScript*>(rootGroupEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 	for (Engine::Entity entity : *selectionGroup)
 	{
 		destinationGroup->Add(entity);
 	}
 	for (Engine::Entity entity : *selectionGroup)
-		thisGroup->Remove(entity);
+		if (thisGroup->Has(entity))
+			thisGroup->Remove(entity);
+		else
+			rootGroup->Remove(entity);
 
 }
 

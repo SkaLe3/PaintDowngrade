@@ -20,13 +20,13 @@ public:
 
 	bool Has(Engine::Entity entity);
 	void Add(Engine::Entity entity);
-	void Remove(Engine::Entity entity);
-	void RemoveRecursive(Engine::Entity selectionEntity);
+	Engine::Entity Remove(Engine::Entity entity);
+	bool RemoveRecursive(Engine::Entity selectionEntity);
 	void Resize();
 	Engine::Entity FindContainerWithSelection(Engine::Entity selectionEntity);
 	bool CheckSelectionPresence(Engine::Entity selectionEntity);
 	Engine::Entity CreateGroup(Engine::Entity selection);
-	void ShipTo(Engine::Entity destinationGroupEntity, Engine::Entity selectionEntity);
+	void ShipTo(Engine::Entity destinationGroupEntity, Engine::Entity selectionEntity, Engine::Entity rootGroupEntity);
 
 
 	EntityContainer& GetEntities() { return m_Entities; }

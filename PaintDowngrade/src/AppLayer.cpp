@@ -143,7 +143,8 @@ bool AppLayer::OnMouseMoved(Engine::MouseMovedEvent& e)
 		if (spacePressed && mousePressed)
 		{
 			CameraController* controller = static_cast<CameraController*>(m_WorkspaceCamera.GetComponent<Engine::NativeScriptComponent>().Instance);
-			controller->Move(x-e.GetX() / ViewportSize.y, y-e.GetY() / ViewportSize.y);
+			controller->Move((x-e.GetX()) / (float)ViewportSize.y, (y-e.GetY()) / (float)ViewportSize.y);
+
 		}
 
 	}

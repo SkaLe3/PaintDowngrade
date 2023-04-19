@@ -229,7 +229,7 @@ void WorkspaceManager::Group()
 		{
 			GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 			Engine::Entity newEntity = placeGroup->CreateGroup(m_SelectionGroup);
-			placeGroup->ShipTo(newEntity, m_SelectionGroup);
+			placeGroup->ShipTo(newEntity, m_SelectionGroup, m_RootGroup);
 			placeGroup->Add(newEntity);
 
 			GroupScript* newGroup = static_cast<GroupScript*>(newEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
