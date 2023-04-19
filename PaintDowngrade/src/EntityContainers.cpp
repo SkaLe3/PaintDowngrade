@@ -1,5 +1,8 @@
 #include "EntityContainer.h"
-
+// temp
+#include "Components/ShapeComponent.h"
+#include <Engine/Scene/Components.h>
+//
 bool EntityContainer::Has(Engine::Entity entity)
 {
 	for (std::vector<Engine::Entity>::iterator it = m_Entities.begin(); it != m_Entities.end();)
@@ -23,7 +26,7 @@ bool EntityContainer::IsEmpty()
 
 void EntityContainer::Add(Engine::Entity entity)
 {
-	m_Entities.push_back(entity);
+	m_Entities.emplace_back(Engine::Entity{entity});
 }
 
 void EntityContainer::Remove(Engine::Entity entity)
@@ -40,6 +43,7 @@ std::vector<Engine::Entity>::iterator EntityContainer::Find(Engine::Entity entit
 			break;
 		it++;
 	}
+
 	return it;
 
 }

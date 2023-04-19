@@ -68,14 +68,15 @@ namespace Engine {
 				Renderer2D::BeginScene(mainCamera->GetProjection(), mainCameraTransform);
 
 				auto view = m_Registry.view<SpriteRendererComponent>();
-
+				uint32_t index=0;
 				for (auto entity = view.rbegin(), last = view.rend(); entity != last; ++entity) 
 				{
 						auto [transform, sprite] = m_Registry.get<TransformComponent, SpriteRendererComponent>(*entity);
 						Renderer2D::DrawSprite(transform.GetTransform(), sprite);
-
-
+						
+						index++;
 				}
+				//EG_INFO("Index = ", index, "camera:", m_Registry.get<TagComponent>(entity).Tag);
 
 				Renderer2D::EndScene();
 

@@ -28,6 +28,7 @@ namespace Engine {
 		static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t count = 0)
 		{
 			s_RendererAPI->DrawIndexed(vertexArray, count);
+			//EG_TRACE("DrawIndexed count = ", count);
 		}
 	private:
 		static RendererAPI* s_RendererAPI;

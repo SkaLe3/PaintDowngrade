@@ -35,7 +35,8 @@ namespace Engine {
 	void OpenGLVertexBuffer::SetData(const void* data, uint32_t size)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+		//glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+		glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

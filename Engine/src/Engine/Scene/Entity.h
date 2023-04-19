@@ -14,12 +14,23 @@ namespace Engine {
 			m_EntityHandle = other.m_EntityHandle;
 			m_Scene = other.m_Scene;
 		}
-		Entity operator=(const Entity& other)
+		Entity& operator=(const Entity& other)
 		{
 			m_EntityHandle = other.m_EntityHandle;
 			m_Scene = other.m_Scene;
 			return *this;
 		}
+
+		Entity& operator=(Entity&& other)
+		{
+			m_EntityHandle = other.m_EntityHandle;
+			m_Scene = other.m_Scene;
+			other.m_EntityHandle = entt::null;
+			other.m_Scene = nullptr;
+			return *this;
+		}
+
+		~Entity() {}
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)
@@ -53,21 +64,22 @@ namespace Engine {
 		void Destroy()
 		{
 			EG_ASSERT((m_EntityHandle != entt::null), "Entity does not exist");
-			m_Scene->m_Registry.destroy(m_EntityHandle);
-			m_EntityHandle = entt::null;
+			m_Scene->DestroyEntity(*this);
+			m_EntityHandle = (entt::entity)355;
+			//m_EntityHandle = entt::null;
 		}
 		Scene* GetScene()
 		{
 			return m_Scene;
 		}
 
-		operator bool() const { return m_EntityHandle != entt::null; }
+		operator bool() const { return m_EntityHandle != entt::null && m_EntityHandle != (entt::entity)355; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 		operator entt::entity() const { return m_EntityHandle; }
 
 		bool operator==(const Entity& other) const
 		{
-			return m_EntityHandle == other.m_EntityHandle  && m_Scene == other.m_Scene;
+			return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene;
 		}
 		
 		bool operator!=(const Entity& other) const
@@ -75,8 +87,9 @@ namespace Engine {
 			return !operator==(other);
 		}
 
-	private:
+	public:
 		entt::entity m_EntityHandle{ entt::null };
+		
 		Scene* m_Scene = nullptr; //12
 
 		 

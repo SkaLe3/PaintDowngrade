@@ -57,7 +57,7 @@ public:
 
 	void Move(float xOffset, float yOffset)
 	{
-		EG_TRACE("OFfset of camera movement X:", xOffset, "Y:", yOffset);
+		//EG_TRACE("OFfset of camera movement X:", xOffset, "Y:", yOffset);
 		auto& translation = GetComponent<Engine::TransformComponent>().Translation;
 		translation.x += xOffset * m_ZoomLevel;
 		translation.x = glm::clamp(translation.x, -m_BoundsX, m_BoundsX);

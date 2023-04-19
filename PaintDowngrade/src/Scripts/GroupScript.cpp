@@ -19,6 +19,29 @@ void GroupScript::Remove(Engine::Entity entity)
 	m_Entities.Remove(entity);
 }
 
+void GroupScript::RemoveRecursive(Engine::Entity selectionEntity)
+{
+	GroupScript* selectionGroup = static_cast<GroupScript*>(selectionEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+	size_t index = 0;
+	for (size_t i = 0; i < GetCount(); i++) // Empty group can't exist
+	{
+		Engine::Entity entity = GetEntities().Get()[index];
+		for (Engine::Entity sEntity : *selectionGroup)
+		if (entity == sEntity)
+		{
+			Remove(entity);
+
+		}
+		else
+			index++;
+	}
+
+	for (Engine::Entity entity : *this)
+		if (entity.HasComponent<Engine::NativeScriptComponent>())
+			static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance)->RemoveRecursive(selectionEntity);
+}
+
 void GroupScript::Resize()
 {
 

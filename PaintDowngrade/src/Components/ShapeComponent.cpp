@@ -5,6 +5,7 @@
 bool ShapeComponent::IsHit(const glm::vec2& coords, Engine::Ref<Engine::Entity> emptyEntity)
 {
 	bool flag = false;
+	EG_TRACE("Entity:", m_Entity.GetComponent<Engine::TagComponent>().Tag, " IsHit Start:", (uint32_t)m_Entity.m_EntityHandle);
 	Engine::TransformComponent& tc = m_Entity.GetComponent<Engine::TransformComponent>();
 	flag = Utils::CheckCollision(tc, coords);
 	if (flag)
@@ -22,9 +23,13 @@ bool ShapeComponent::IsHit(const glm::vec2& coords, Engine::Ref<Engine::Entity> 
 
 	if (Type == ShapeType::Group)
 	{ 
-		EntityContainer& entities = static_cast<GroupScript*>(m_Entity.GetComponent<Engine::NativeScriptComponent>().Instance)->GetEntities();
-		for (Engine::Entity entity : entities)
+		GroupScript* entities = static_cast<GroupScript*>(m_Entity.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+
+		for (Engine::Entity entity : *entities) {
+			EG_TRACE("Entity:",entity.GetComponent<Engine::TagComponent>().Tag, " IsHit:",(uint32_t)entity.GetComponent<ShapeComponent>().m_Entity);
 			flag |= entity.GetComponent<ShapeComponent>().IsHit(coords, emptyEntity);
+		}
 	}
 
 	return flag;
@@ -67,5 +72,20 @@ void ShapeComponent::Resize(float x, float y, bool linked)
 		for (auto entity : *group)
 			entity.GetComponent<ShapeComponent>().Resize(x, y, linked);
 	}
+}
+
+void ShapeComponent::Destroy()
+{
+	if (m_Entity.HasComponent<Engine::NativeScriptComponent>())
+	{
+		GroupScript* group = static_cast<GroupScript*>(m_Entity.GetComponent<Engine::NativeScriptComponent>().Instance);
+		for (Engine::Entity entity : *group)
+			entity.GetComponent<ShapeComponent>().Destroy();
+
+	}
+
+	m_Entity.Destroy();
+
+
 }
 

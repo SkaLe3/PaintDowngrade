@@ -21,6 +21,7 @@ public:
 	bool Has(Engine::Entity entity);
 	void Add(Engine::Entity entity);
 	void Remove(Engine::Entity entity);
+	void RemoveRecursive(Engine::Entity selectionEntity);
 	void Resize();
 	Engine::Entity FindContainerWithSelection(Engine::Entity selectionEntity);
 	bool CheckSelectionPresence(Engine::Entity selectionEntity);
@@ -33,6 +34,7 @@ public:
 	uint32_t GetIndex() const { return m_LayerIndex; }
 	void SetIndex(uint32_t index) { m_LayerIndex = index; }
 	void RefreshIndices();
+
 
 
 public:

@@ -24,6 +24,7 @@ struct ShapeComponent
 		: Type(type), Size(size), LocalTranslate(translate), m_Entity(entity) {}
 	ShapeComponent(ShapeType type, Engine::Entity entity)
 		: Type(type), m_Entity(entity) {}
+	~ShapeComponent() {}
 
 	//Radius is x coordinate devided by 2
 	//Because I don't have circle rendering yet
@@ -31,7 +32,9 @@ struct ShapeComponent
 	bool IsHit(const glm::vec2& coords, Engine::Ref<Engine::Entity> emptyEntity);
 	void Move(float x, float y);
 	void Resize(float x, float y, bool linked);
-private:
+	void Destroy();
+		
+public:
 	Engine::Entity m_Entity;
 
 

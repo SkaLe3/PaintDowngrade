@@ -378,7 +378,8 @@ void UIManager::OnKeyPressed(Engine::KeyCode key)
 
 		}
 	else
-		if (altPressed)
+	{
+		if (altPressed) // Change size
 			switch (key)
 			{
 			case Engine::Key::Left:
@@ -408,7 +409,7 @@ void UIManager::OnKeyPressed(Engine::KeyCode key)
 			}
 
 			}
-		else
+		else			// Move
 			switch (key)
 			{
 			case Engine::Key::Left:
@@ -432,12 +433,19 @@ void UIManager::OnKeyPressed(Engine::KeyCode key)
 			}
 			case Engine::Key::Up:
 			{
-				ChangeSelectedPositionCommand command(m_Workspace, 0,  value);
+				ChangeSelectedPositionCommand command(m_Workspace, 0, value);
 				command.Execute();
 				break;
 			}
 
 			}
+
+		if (key == Engine::Key::Delete || key == Engine::Key::Backspace)
+		{
+			DestroyCommand command(m_Workspace);
+			command.Execute();
+		}
+	}
 }
 
 Engine::Entity UIManager::CreateUIElement(const UIElementSpecification& spec)

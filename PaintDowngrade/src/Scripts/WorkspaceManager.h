@@ -25,7 +25,7 @@ public:
 	void DrawEntity(const glm::vec2& coords);
 
 
-	void DestroyEntity() {}
+	void DestroyEntity();
 	void Group();
 	void Ungroup() {}
 	void AddToGroup() {}

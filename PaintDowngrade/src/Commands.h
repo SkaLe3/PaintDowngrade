@@ -226,3 +226,17 @@ public:
 	}
 
 };
+
+class DestroyCommand : public Command
+{
+public:
+	DestroyCommand(WorkspaceManager* workspace)
+		: Command(workspace) {}
+
+	virtual void Execute()
+	{
+		m_Workspace->DestroyEntity();
+		m_Workspace->ResizeGroups();
+		EG_TRACE("Destroy called");
+	}
+};
