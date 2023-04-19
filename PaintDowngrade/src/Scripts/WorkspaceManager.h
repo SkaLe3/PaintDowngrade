@@ -27,7 +27,7 @@ public:
 
 	void DestroyEntity();
 	void Group();
-	void Ungroup() {}
+	void Ungroup();
 	void AddToGroup() {}
 	void RemoveFromGroup() {}
 	void MergeGroups() {}

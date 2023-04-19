@@ -45,37 +45,29 @@ bool GroupScript::RemoveRecursive(Engine::Entity selectionEntity)
 	index = 0;
 	for (size_t i = 0; i < count; i++, index++) // Empty group can't exist
 	{
-
 		Engine::Entity entity = GetEntities().Get()[index];
 		if (entity.HasComponent<Engine::NativeScriptComponent>())
 		{
 			GroupScript* group = static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance);
 			shouldExist = group->RemoveRecursive(selectionEntity);
-#if 1	
 			if (!shouldExist)
 			{
-
 				if (group->GetCount() > 0)
 				{
 					Engine::Entity tempEntity = group->GetEntities().Get()[0];
 					group->Remove(tempEntity);
 					Add(tempEntity);
 					EG_TRACE("count ", group->GetCount());
-
 				}
 				Engine::Entity removed = Remove(entity);
 				removed.Destroy();
 				index--;
 
 			}
-
-#endif
 		}
 	}
-	 
+ 
 	RefreshIndices();
-
-
 
 	if (GetCount() > 1)
 		return true;
@@ -150,20 +142,34 @@ Engine::Entity GroupScript::FindContainerWithSelection(Engine::Entity selectionE
 	return emptyEntity;
 }
 
+Engine::Entity GroupScript::FindContainerWithEntity(Engine::Entity entity)
+{
+	Engine::Entity emptyEntity;
+	if (Has(entity))
+		return this->m_Entity;
+
+	for (Engine::Entity candidate : *this)
+		if (entity.HasComponent<Engine::NativeScriptComponent>())
+		{
+			GroupScript* group = static_cast<GroupScript*>(candidate.GetComponent<Engine::NativeScriptComponent>().Instance);
+			emptyEntity = group->FindContainerWithEntity(entity);
+		}
+	return emptyEntity;
+}
+
 bool GroupScript::CheckSelectionPresence(Engine::Entity selectionEntity)
 {
 	GroupScript* selection = static_cast<GroupScript*>(selectionEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
 	uint32_t count = selection->GetCount();
-	EG_TRACE("count1 = ", count);
+
 	if (GetIndex() != 0) {
 		for (Engine::Entity entity : *selection)
 		{
 			glm::vec3 translation = entity.GetComponent<Engine::TransformComponent>().Translation;
-			EG_TRACE("Translation.z = ", translation.z);
 			if (translation.z < 0.03f)
 				--count;
 		}
-		EG_TRACE("count2 = ", count);
+
 		if (count == GetCount())
 			return false;
 	}
@@ -178,7 +184,6 @@ bool GroupScript::CheckSelectionPresence(Engine::Entity selectionEntity)
 			}
 		}
 	}
-	EG_TRACE("count3 = ", count);
 	return count == 0;
 	
 }

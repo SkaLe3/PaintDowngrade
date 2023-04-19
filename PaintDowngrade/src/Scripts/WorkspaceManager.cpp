@@ -248,6 +248,45 @@ void WorkspaceManager::Group()
 
 }
 
+void WorkspaceManager::Ungroup()
+{
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	if (selectionGroup->GetCount() > 0)
+	{
+
+
+		GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+		int32_t count = selectionGroup->GetCount();
+		EG_TRACE("count = ", count);
+		size_t index = 0;
+		for (size_t i = 0; i < count; i++, index++)
+		{
+			Engine::Entity entity = selectionGroup->GetEntities().Get()[index];
+			if (!entity.HasComponent<Engine::NativeScriptComponent>())
+				continue;
+
+			Engine::Entity placeEntity = rootGroup->FindContainerWithEntity(entity);
+			GroupScript* group = static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance);
+			GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+			
+			
+			int32_t count2 = group->GetCount();
+			for (size_t i = 0; i < count2; i++) 
+			{
+				Engine::Entity toMove = group->GetEntities().Get()[0];
+				group->Remove(toMove);
+				placeGroup->Add(toMove);
+			}
+			placeGroup->Remove(entity);
+			Engine::Entity toDestroy{ entity };
+			Deselect(entity);
+			toDestroy.Destroy();
+			index--;
+		}
+	}
+}
+
+
 void WorkspaceManager::EnableFollowCursorShape()
 {
 	if (!m_FollowCursorShape)

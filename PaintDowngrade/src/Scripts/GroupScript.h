@@ -24,6 +24,7 @@ public:
 	bool RemoveRecursive(Engine::Entity selectionEntity);
 	void Resize();
 	Engine::Entity FindContainerWithSelection(Engine::Entity selectionEntity);
+	Engine::Entity FindContainerWithEntity(Engine::Entity entity);
 	bool CheckSelectionPresence(Engine::Entity selectionEntity);
 	Engine::Entity CreateGroup(Engine::Entity selection);
 	void ShipTo(Engine::Entity destinationGroupEntity, Engine::Entity selectionEntity, Engine::Entity rootGroupEntity);
