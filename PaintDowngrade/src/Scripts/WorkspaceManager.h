@@ -28,9 +28,9 @@ public:
 	void DestroyEntity();
 	void Group();
 	void Ungroup();
-	void AddToGroup() {}
-	void RemoveFromGroup() {}
-	void MergeGroups() {}
+	void AddToGroup();
+	void RemoveFromGroup();
+	void MergeGroups();
 	void Copy() {}
 	void ResizeBrush(float x, float y, bool linked);
 	void Resize(float x, float y, bool linked);

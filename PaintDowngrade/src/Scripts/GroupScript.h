@@ -21,7 +21,7 @@ public:
 	bool Has(Engine::Entity entity);
 	void Add(Engine::Entity entity);
 	Engine::Entity Remove(Engine::Entity entity);
-	bool RemoveRecursive(Engine::Entity selectionEntity);
+	void RemoveRecursive(Engine::Entity selectionEntity);
 	void Resize();
 	Engine::Entity FindContainerWithSelection(Engine::Entity selectionEntity);
 	Engine::Entity FindContainerWithEntity(Engine::Entity entity);

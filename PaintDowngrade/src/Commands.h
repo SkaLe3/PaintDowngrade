@@ -184,6 +184,7 @@ public:
 	virtual void Execute()
 	{
 		m_Workspace->Ungroup();
+		m_Workspace->ResizeGroups();
 	}
 
 };
@@ -197,6 +198,7 @@ public:
 	virtual void Execute()
 	{
 		m_Workspace->AddToGroup();
+		m_Workspace->ResizeGroups();
 	}
 
 };
@@ -210,6 +212,7 @@ public:
 	virtual void Execute()
 	{
 		m_Workspace->RemoveFromGroup();
+		m_Workspace->ResizeGroups();
 	}
 
 };
@@ -223,6 +226,7 @@ public:
 	virtual void Execute()
 	{
 		m_Workspace->MergeGroups();
+		m_Workspace->ResizeGroups();
 	}
 
 };

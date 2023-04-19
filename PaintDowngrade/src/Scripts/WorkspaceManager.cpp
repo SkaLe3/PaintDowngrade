@@ -219,31 +219,30 @@ void WorkspaceManager::Group()
 {
 	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
 
-	if (selectionGroup->GetCount() > 1)
+	if (selectionGroup->GetCount() <= 1)
+		return;
+
+
+	GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	Engine::Entity placeEntity = rootGroup->FindContainerWithSelection(m_SelectionGroup); //If contains all of the entities that not on the 0 level returns this container
+	if (placeEntity)
 	{
+		GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+		Engine::Entity newEntity = placeGroup->CreateGroup(m_SelectionGroup);
+		placeGroup->ShipTo(newEntity, m_SelectionGroup, m_RootGroup);
+		placeGroup->Add(newEntity);
 
+		GroupScript* newGroup = static_cast<GroupScript*>(newEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+		newGroup->SetIndex(placeGroup->GetIndex() + 1);
+		newGroup->RefreshIndices();
 
-		GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
-		Engine::Entity placeEntity = rootGroup->FindContainerWithSelection(m_SelectionGroup); //If contains all of the entities that not on the 0 level returns this container
-		if (placeEntity)
-		{
-			GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
-			Engine::Entity newEntity = placeGroup->CreateGroup(m_SelectionGroup);
-			placeGroup->ShipTo(newEntity, m_SelectionGroup, m_RootGroup);
-			placeGroup->Add(newEntity);
+		EG_TRACE("Created Group Index", newGroup->GetIndex());
 
-			GroupScript* newGroup = static_cast<GroupScript*>(newEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
-			newGroup->SetIndex(placeGroup->GetIndex() + 1);
-			newGroup->RefreshIndices();
-
-			EG_TRACE("Created Group Index", newGroup->GetIndex());
-
-			EG_TRACE("x: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.x,
-				"y: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.y,
-				"z: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.z);
-			EG_TRACE("Width: ", newEntity.GetComponent<Engine::TransformComponent>().Scale.x,
-				"Height: ", newEntity.GetComponent<Engine::TransformComponent>().Scale.y);
-		}
+		EG_TRACE("x: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.x,
+			"y: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.y,
+			"z: ", newEntity.GetComponent<Engine::TransformComponent>().Translation.z);
+		EG_TRACE("Width: ", newEntity.GetComponent<Engine::TransformComponent>().Scale.x,
+			"Height: ", newEntity.GetComponent<Engine::TransformComponent>().Scale.y);
 	}
 
 }
@@ -251,41 +250,136 @@ void WorkspaceManager::Group()
 void WorkspaceManager::Ungroup()
 {
 	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
-	if (selectionGroup->GetCount() > 0)
+	if (selectionGroup->GetCount() == 0)
+		return;
+
+	GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	int32_t count = selectionGroup->GetCount();
+	EG_TRACE("count = ", count);
+	size_t index = 0;
+	for (size_t i = 0; i < count; i++, index++)
 	{
+		Engine::Entity entity = selectionGroup->GetEntities().Get()[index];
+		if (!entity.HasComponent<Engine::NativeScriptComponent>())
+			continue;
 
-
-		GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
-		int32_t count = selectionGroup->GetCount();
-		EG_TRACE("count = ", count);
-		size_t index = 0;
-		for (size_t i = 0; i < count; i++, index++)
+		Engine::Entity placeEntity = rootGroup->FindContainerWithEntity(entity);
+		GroupScript* group = static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance);
+		GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+		
+		
+		int32_t count2 = group->GetCount();
+		for (size_t i = 0; i < count2; i++) 
 		{
-			Engine::Entity entity = selectionGroup->GetEntities().Get()[index];
-			if (!entity.HasComponent<Engine::NativeScriptComponent>())
-				continue;
-
-			Engine::Entity placeEntity = rootGroup->FindContainerWithEntity(entity);
-			GroupScript* group = static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance);
-			GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
-			
-			
-			int32_t count2 = group->GetCount();
-			for (size_t i = 0; i < count2; i++) 
-			{
-				Engine::Entity toMove = group->GetEntities().Get()[0];
-				group->Remove(toMove);
-				placeGroup->Add(toMove);
-			}
-			placeGroup->Remove(entity);
-			Engine::Entity toDestroy{ entity };
-			Deselect(entity);
-			toDestroy.Destroy();
-			index--;
+			Engine::Entity toMove = group->GetEntities().Get()[0];
+			group->Remove(toMove);
+			placeGroup->Add(toMove);
 		}
+		placeGroup->Remove(entity);
+		Engine::Entity toDestroy{ entity };
+		Deselect(entity);
+		toDestroy.Destroy();
+		index--;
+	}
+	rootGroup->RefreshIndices();
+	
+}
+
+
+void WorkspaceManager::AddToGroup()
+{
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	if (selectionGroup->GetCount() < 2)
+		return;
+	Engine::Entity destinationEntity;
+	uint32_t maxIndex = 0;
+	for (Engine::Entity candidate : *selectionGroup)
+		if (candidate.HasComponent<Engine::NativeScriptComponent>())
+		{
+			GroupScript* candidateGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+			if (candidateGroup->GetIndex() >= maxIndex)
+			{
+				destinationEntity = candidate;
+				maxIndex = candidateGroup->GetIndex();
+			}
+		}
+
+	GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	Engine::Entity placeEntity = rootGroup->FindContainerWithSelection(m_SelectionGroup);
+	if (!placeEntity)
+		return;
+
+	GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+	Deselect(destinationEntity);
+
+	placeGroup->ShipTo(destinationEntity, m_SelectionGroup, m_RootGroup);
+
+	placeGroup->RefreshIndices();
+			
+}
+
+void WorkspaceManager::RemoveFromGroup()
+{
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	if (selectionGroup->GetCount() == 0)
+		return;
+	GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	for (Engine::Entity entity : *selectionGroup)
+	{
+		Engine::Entity placeEntity = rootGroup->FindContainerWithEntity(entity);
+		Engine::Entity destinationEntity = rootGroup->FindContainerWithEntity(placeEntity);
+
+		GroupScript* placeGroup = static_cast<GroupScript*>(placeEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+		GroupScript* destinationGroup = static_cast<GroupScript*>(destinationEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
+
+		placeGroup->Remove(entity);
+		destinationGroup->Add(entity);
+		// make funciton
+		if (placeGroup->GetCount() == 1)
+		{
+			Engine::Entity tempEntity = placeGroup->GetEntities().Get()[0];
+			placeGroup->Remove(tempEntity);
+			destinationGroup->Add(tempEntity);
+		}
+		if (placeGroup->GetCount() == 0)
+		{
+
+			destinationGroup->Remove(placeEntity);
+			placeEntity.Destroy();
+		}
+
+		
+		// ^^^^^^^^^^^^^
+		destinationGroup->RefreshIndices();
 	}
 }
 
+void WorkspaceManager::MergeGroups()
+{
+	GroupScript* selectionGroup = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	if (selectionGroup->GetCount() < 2)
+		return;
+	uint32_t lastIndex = 0;
+	for (Engine::Entity entity : *selectionGroup)
+	{
+		if (!entity.HasComponent<Engine::NativeScriptComponent>())
+			return;
+		lastIndex = static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance)->GetIndex();
+	}
+
+	for (Engine::Entity entity : *selectionGroup)
+		if (lastIndex != static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance)->GetIndex())
+			return;
+
+	GroupScript* rootGroup = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
+	Engine::Entity placeEntity = rootGroup->FindContainerWithSelection(m_SelectionGroup);
+	if (!placeEntity)
+		return;
+	
+	AddToGroup();
+	Ungroup();
+	
+}
 
 void WorkspaceManager::EnableFollowCursorShape()
 {

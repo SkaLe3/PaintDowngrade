@@ -20,7 +20,7 @@ Engine::Entity GroupScript::Remove(Engine::Entity entity)
 	return entity;
 }
 
-bool GroupScript::RemoveRecursive(Engine::Entity selectionEntity)
+void GroupScript::RemoveRecursive(Engine::Entity selectionEntity)
 {
 	bool shouldExist = true;
 	GroupScript* selectionGroup = static_cast<GroupScript*>(selectionEntity.GetComponent<Engine::NativeScriptComponent>().Instance);
@@ -49,16 +49,17 @@ bool GroupScript::RemoveRecursive(Engine::Entity selectionEntity)
 		if (entity.HasComponent<Engine::NativeScriptComponent>())
 		{
 			GroupScript* group = static_cast<GroupScript*>(entity.GetComponent<Engine::NativeScriptComponent>().Instance);
-			shouldExist = group->RemoveRecursive(selectionEntity);
-			if (!shouldExist)
+			group->RemoveRecursive(selectionEntity);
+
+			if (group->GetCount() == 1)
 			{
-				if (group->GetCount() > 0)
-				{
-					Engine::Entity tempEntity = group->GetEntities().Get()[0];
-					group->Remove(tempEntity);
-					Add(tempEntity);
-					EG_TRACE("count ", group->GetCount());
-				}
+				Engine::Entity tempEntity = group->GetEntities().Get()[0];
+				group->Remove(tempEntity);
+				Add(tempEntity);
+				EG_TRACE("count ", group->GetCount());
+			}
+			if (group->GetCount() == 0)
+			{
 				Engine::Entity removed = Remove(entity);
 				removed.Destroy();
 				index--;
@@ -69,9 +70,6 @@ bool GroupScript::RemoveRecursive(Engine::Entity selectionEntity)
  
 	RefreshIndices();
 
-	if (GetCount() > 1)
-		return true;
-	return false;
 }
 
 void GroupScript::Resize()
@@ -149,7 +147,7 @@ Engine::Entity GroupScript::FindContainerWithEntity(Engine::Entity entity)
 		return this->m_Entity;
 
 	for (Engine::Entity candidate : *this)
-		if (entity.HasComponent<Engine::NativeScriptComponent>())
+		if (candidate.HasComponent<Engine::NativeScriptComponent>())
 		{
 			GroupScript* group = static_cast<GroupScript*>(candidate.GetComponent<Engine::NativeScriptComponent>().Instance);
 			emptyEntity = group->FindContainerWithEntity(entity);
@@ -170,7 +168,7 @@ bool GroupScript::CheckSelectionPresence(Engine::Entity selectionEntity)
 				--count;
 		}
 
-		if (count == GetCount())
+		if (count == GetCount()) // false if selected all of the objects in the group, to avoid creation of empty redundant groups
 			return false;
 	}
 	for (Engine::Entity toSearchEntity : *selection)
