@@ -34,7 +34,7 @@ struct ShapeComponent
 	void Resize(float x, float y, bool linked);
 	void Destroy();
 		
-public:
+private:
 	Engine::Entity m_Entity;
 
 

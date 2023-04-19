@@ -199,30 +199,17 @@ void WorkspaceManager::DestroyEntity()
 
 	GroupScript* selection = static_cast<GroupScript*>(m_SelectionGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
 
-	//temp
-	GroupScript* root = static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance);
 
-	//
-	
+
 	static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->RemoveRecursive(m_SelectionGroup);
 
-	ShapeComponent& sc = root->GetEntities().Get()[0].GetComponent<ShapeComponent>();
-	Engine::TagComponent& tc = root->GetEntities().Get()[0].GetComponent<Engine::TagComponent>();
 
-	EG_TRACE("1111111 DestroyEntity | first entity of RootGroup",
-		(uint32_t)static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->GetEntities().Get()[0].GetComponent<ShapeComponent>().m_Entity,
-		"Tag :",
-		static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->GetEntities().Get()[0].GetComponent<Engine::TagComponent>().Tag);
+
 	for (Engine::Entity entity : *selection)
 		entity.GetComponent<ShapeComponent>().Destroy();
 
-	ShapeComponent& sc2 = root->GetEntities().Get()[0].GetComponent<ShapeComponent>();
-	Engine::TagComponent& tc2 = root->GetEntities().Get()[0].GetComponent<Engine::TagComponent>();
-	EG_TRACE("222222 DestroyEntity | first entity of RootGroup",
-		(uint32_t)static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->GetEntities().Get()[0].GetComponent<ShapeComponent>().m_Entity,
-		"Tag :",
-		static_cast<GroupScript*>(m_RootGroup.GetComponent<Engine::NativeScriptComponent>().Instance)->GetEntities().Get()[0].GetComponent<Engine::TagComponent>().Tag);
-		
+	
+
 	selection->GetEntities().Clear();
 	
 

@@ -31,10 +31,10 @@ void GroupScript::RemoveRecursive(Engine::Entity selectionEntity)
 		if (entity == sEntity)
 		{
 			Remove(entity);
+			break;
 
 		}
-		else
-			index++;
+		index++;
 	}
 
 	for (Engine::Entity entity : *this)

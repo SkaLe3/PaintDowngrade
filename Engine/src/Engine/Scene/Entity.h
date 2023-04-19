@@ -65,8 +65,7 @@ namespace Engine {
 		{
 			EG_ASSERT((m_EntityHandle != entt::null), "Entity does not exist");
 			m_Scene->DestroyEntity(*this);
-			m_EntityHandle = (entt::entity)355;
-			//m_EntityHandle = entt::null;
+			m_EntityHandle = entt::null;
 		}
 		Scene* GetScene()
 		{
@@ -87,7 +86,7 @@ namespace Engine {
 			return !operator==(other);
 		}
 
-	public:
+	private:
 		entt::entity m_EntityHandle{ entt::null };
 		
 		Scene* m_Scene = nullptr; //12
