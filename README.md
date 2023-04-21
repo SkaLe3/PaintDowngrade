@@ -15,26 +15,4 @@ After cloning run GenerateProjects.bat script file to generate a Visual Studio 2
 
 # Controls
 
-Draw Mode:
-	Arrows:
-		Change Brush size;
-		+Shift - value x2;
-		+Ctrl - Change size linked;
-
-
-
-Cursor Mode:
-	Arrows:
-		Change Selected shapes size;
-		+Shift - value x2 ;
-		+Ctrl - Change size linked;
-		+Alt - Change position;
-	Mouse movement:
-		+Space +LeftMB - Move camera;
-
-
-Any Mode:
-	Mouse Scroll:
-		Move camera;
-		+Alt - Zoom camera;
-
+Look in controls.txt file

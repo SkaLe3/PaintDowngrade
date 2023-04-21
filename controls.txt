@@ -1,0 +1,24 @@
+Draw Mode:
+	Arrows:
+		Change Brush size;
+		+Shift - value x5;
+		+Ctrl - Change linked;
+
+
+
+Cursor Mode:
+	Arrows:
+		Change Selected shape size;
+		+Shift - value x5 ;
+		+Ctrl - Change linked;
+		+Alt - Change position;
+	Mouse movement:
+		+Space +LeftMB - Move camera;
+
+
+
+Any Mode:
+	Mouse Scroll:
+		Move camera;
+		+Alt - Zoom camera;
+
